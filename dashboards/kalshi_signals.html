@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalshi Signal Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0a0e16; --slate:#141b27; --slate2:#0f1620; --line:#1f2a39; --line2:#283648;
+    --ink:#e8eef6; --mute:#6b7c93; --faint:#43546b;
+    --phosphor:#5eead4; --gold:#fbbf24; --coral:#fb6f70; --green:#34d399;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+    --disp:"Space Grotesk",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--void);color:var(--ink);font-family:var(--disp);
+    -webkit-font-smoothing:antialiased;line-height:1.45;
+    background-image:radial-gradient(circle at 18% -10%,rgba(94,234,212,.06),transparent 45%),
+                     radial-gradient(circle at 90% 0%,rgba(251,191,36,.04),transparent 40%);
+    background-attachment:fixed}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 22px}
+
+  header{position:sticky;top:0;z-index:30;
+    background:linear-gradient(180deg,var(--void) 62%,rgba(10,14,22,.85) 100%);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .head{display:flex;align-items:center;justify-content:space-between;gap:18px;
+    flex-wrap:wrap;padding:16px 0 15px}
+  .brand{display:flex;align-items:center;gap:13px}
+  .glyph{width:30px;height:30px;border:1.5px solid var(--phosphor);border-radius:7px;
+    display:grid;place-items:center;position:relative;flex:none}
+  .glyph::before{content:"";width:11px;height:11px;border:1.5px solid var(--phosphor);
+    border-radius:50%;opacity:.55}
+  .glyph::after{content:"";position:absolute;width:5px;height:5px;border-radius:50%;
+    background:var(--phosphor);box-shadow:0 0 9px var(--phosphor)}
+  .brand h1{font-size:17px;font-weight:600;letter-spacing:-.015em}
+  .brand .sub{font-family:var(--mono);font-size:10px;color:var(--faint);
+    letter-spacing:.14em;text-transform:uppercase;margin-top:1px}
+  .tools{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px}
+  .live-tag{display:flex;align-items:center;gap:7px;color:var(--mute);
+    padding:6px 11px;border:1px solid var(--line);border-radius:20px;background:var(--slate2)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--faint);flex:none}
+  .dot.on{background:var(--green);box-shadow:0 0 10px var(--green);animation:beat 1.8s infinite}
+  .dot.off{background:var(--coral);box-shadow:0 0 10px var(--coral)}
+  @keyframes beat{50%{opacity:.35}}
+  .btn{font-family:var(--mono);font-size:11px;color:var(--ink);background:var(--slate);
+    border:1px solid var(--line2);border-radius:8px;padding:7px 13px;cursor:pointer;
+    transition:.15s;letter-spacing:.02em}
+  .btn:hover{border-color:var(--phosphor);color:var(--phosphor)}
+  .btn:focus-visible{outline:2px solid var(--phosphor);outline-offset:2px}
+  .btn:disabled{opacity:.4;cursor:default}
+  .btn.on{border-color:var(--phosphor);color:var(--phosphor);background:rgba(94,234,212,.08)}
+
+  .hero{padding:30px 0 8px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--faint);margin-bottom:14px}
+  .thesis{font-size:clamp(26px,4.4vw,42px);font-weight:600;letter-spacing:-.025em;line-height:1.08;max-width:21ch}
+  .thesis .em{color:var(--phosphor)}
+  .thesis .strike{color:var(--coral);text-decoration:line-through;text-decoration-thickness:2px;
+    text-decoration-color:rgba(251,111,112,.55)}
+  .lede{color:var(--mute);font-size:14.5px;line-height:1.6;max-width:62ch;margin-top:18px}
+  .lede b{color:var(--ink);font-weight:500}
+
+  .cluster{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin:30px 0 8px;
+    background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .gauge{background:var(--slate2);padding:16px 18px;position:relative}
+  .gauge .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .gauge .v{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-.02em;margin-top:8px;line-height:1}
+  .gauge .u{font-size:13px;color:var(--mute);font-weight:400}
+  .gauge.accent .v{color:var(--green)}
+  .gauge.danger .v{color:var(--coral)}
+
+  .frame{border:1px solid var(--line);border-radius:14px;background:var(--slate2);
+    margin:22px 0;overflow:hidden}
+  .frame-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .frame-head h2{font-size:13px;font-weight:600;letter-spacing:.02em}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--mute)}
+  .legend span{display:flex;align-items:center;gap:7px}
+  .seg{width:18px;height:5px;border-radius:3px;display:inline-block}
+
+  .thead,.row{display:grid;
+    grid-template-columns:2.5fr .95fr .8fr .85fr .7fr 1.5fr;gap:12px;align-items:center}
+  .thead{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--faint);padding:12px 18px;border-bottom:1px solid var(--line)}
+  .thead .r{text-align:right}
+  .rows{display:flex;flex-direction:column}
+  .row{padding:14px 18px;border-bottom:1px solid rgba(31,42,57,.55);font-size:13px;
+    transition:background .14s;position:relative}
+  .row:last-child{border-bottom:none}
+  .row:hover{background:rgba(94,234,212,.025)}
+  .row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:transparent}
+  .row.go::before{background:var(--green);box-shadow:0 0 12px var(--green)}
+  .row.no::before{background:var(--coral)}
+  .row.warn::before{background:var(--gold)}
+  .mkt{min-width:0}
+  .mkt .t{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13.5px}
+  .mkt .tk{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:2px}
+  .num{font-family:var(--mono);text-align:right;font-size:13px}
+  .num.edge.pos{color:var(--green)} .num.edge.neg{color:var(--coral)}
+  .num .sm{font-size:10px;color:var(--faint)}
+
+  .integ{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+  .meter{display:flex;gap:3px}
+  .meter i{width:26px;height:6px;border-radius:3px;background:var(--line2);position:relative;overflow:hidden}
+  .meter i.ok{background:var(--green);box-shadow:0 0 7px rgba(52,211,153,.5)}
+  .meter i.bad{background:var(--coral)}
+  .meter i.warn{background:var(--gold)}
+  .vlabel{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.04em}
+  .vlabel.go{color:var(--green)} .vlabel.no{color:var(--coral)} .vlabel.warn{color:var(--gold)}
+  .vlabel .why{color:var(--faint);font-weight:400;letter-spacing:0}
+
+  .empty{padding:64px 22px;text-align:center;color:var(--mute);font-family:var(--mono);font-size:13px;line-height:1.7}
+  .empty.err{color:var(--coral)}
+  .empty code{background:var(--slate);padding:2px 7px;border-radius:5px;color:var(--gold);font-size:12px}
+  .spin{width:15px;height:15px;border:2px solid var(--line2);border-top-color:var(--phosphor);
+    border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:-3px;margin-right:9px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .notes{padding:22px 0 10px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .note{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--slate2)}
+  .note h3{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--phosphor);margin-bottom:9px}
+  .note.warn h3{color:var(--gold)}
+  .note p{font-size:12.5px;color:var(--mute);line-height:1.6}
+  .note p b{color:var(--ink);font-weight:500}
+  .foot{font-family:var(--mono);font-size:10.5px;color:var(--faint);text-align:center;
+    padding:28px 0 8px;letter-spacing:.04em}
+
+  @media(max-width:820px){
+    .cluster{grid-template-columns:1fr 1fr}
+    .notes{grid-template-columns:1fr}
+  }
+  @media(max-width:680px){
+    .thead{display:none}
+    .row{grid-template-columns:1fr 1fr;gap:8px 12px;padding:16px 16px}
+    .mkt{grid-column:1/-1}
+    .num::before{content:attr(data-l);display:block;font-size:9px;color:var(--faint);
+      text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+    .num{text-align:left}
+    .integ{grid-column:1/-1;align-items:flex-start;margin-top:4px}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap head">
+    <div class="brand">
+      <div class="glyph" aria-hidden="true"></div>
+      <div>
+        <h1>Kalshi Signal Desk</h1>
+        <div class="sub">read-only &middot; live order books</div>
+      </div>
+    </div>
+    <div class="tools">
+      <span class="live-tag"><span class="dot" id="dot"></span><span id="connTxt">idle</span></span>
+      <span class="meta" id="lastSync" style="color:var(--faint)"></span>
+      <button class="btn" id="refreshBtn">&#8635; Refresh</button>
+      <button class="btn" id="autoBtn">Auto &middot; off</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="hero">
+    <div class="eyebrow">Arbitrage integrity scanner</div>
+    <h1 class="thesis">A <span class="strike">95% win rate</span> means nothing if the fill <span class="em">isn't there.</span></h1>
+    <p class="lede">This reads <b>live public Kalshi data</b> and scores every contract on the three things the headline price hides &mdash; net edge after the <b>$0.02/contract fee</b>, real order-book <b>depth</b>, and quote <b>freshness</b>. It places no trades and holds no keys. Most rows will flag red. That's not a bug &mdash; that's the market being efficient, shown honestly.</p>
+  </section>
+
+  <section class="cluster" aria-label="Scan summary">
+    <div class="gauge"><div class="k">Markets scanned</div><div class="v" id="sScanned">&mdash;</div></div>
+    <div class="gauge accent"><div class="k">Clean signals</div><div class="v" id="sClean">&mdash;</div></div>
+    <div class="gauge danger"><div class="k">Flagged as fake</div><div class="v" id="sFlag">&mdash;</div></div>
+    <div class="gauge"><div class="k">Median quote age</div><div class="v" id="sAge">&mdash;</div></div>
+  </section>
+
+  <section class="frame">
+    <div class="frame-head">
+      <h2>Live signal book</h2>
+      <div class="legend">
+        <span><i class="seg" style="background:var(--green)"></i> clean</span>
+        <span><i class="seg" style="background:var(--gold)"></i> marginal</span>
+        <span><i class="seg" style="background:var(--coral)"></i> flagged</span>
+      </div>
+    </div>
+    <div class="thead">
+      <div>Market</div>
+      <div class="r">YES / NO</div>
+      <div class="r">Book gap</div>
+      <div class="r">Net edge</div>
+      <div class="r">Depth</div>
+      <div class="r">Integrity &middot; fees / depth / fresh</div>
+    </div>
+    <div class="rows" id="rows">
+      <div class="empty"><span class="spin"></span>Initializing scan&hellip;</div>
+    </div>
+  </section>
+
+  <section class="notes">
+    <div class="note">
+      <h3>How net edge is read</h3>
+      <p>On a binary contract, the best YES bid and best NO bid should sum near 100&cent;. When they sum to <b>less</b>, that gap is the gross mispricing. Net edge subtracts both legs' $0.02 fee plus a slippage haircut scaled to how thin the book is. What survives is a <b>real</b> edge &mdash; usually a fraction of a cent, if anything.</p>
+    </div>
+    <div class="note warn">
+      <h3>Why red is the honest default</h3>
+      <p>Liquid markets are efficient. The gap almost always dies once you price in fees and the contracts you could actually clear. A green row is rare and worth a human look &mdash; and even then, <b>you</b> place the order. No bot, no keys, no promises.</p>
+    </div>
+  </section>
+
+  <div class="foot">SOURCE &middot; KALSHI PUBLIC TRADE API V2 &middot; NO AUTH &middot; RESEARCH, NOT ADVICE</div>
+</div>
+
+<script>
+const API = "https://external-api.kalshi.com/trade-api/v2";
+const FEE_CENTS = 2, STALE_MS = 90000, MIN_DEPTH = 20, SCAN_LIMIT = 60;
+let auto = null;
+const $ = id => document.getElementById(id);
+
+function setConn(state, txt){
+  $("dot").className = "dot" + (state==="live"?" on":state==="err"?" off":"");
+  $("connTxt").textContent = txt;
+}
+async function getJSON(url){
+  const r = await fetch(url,{headers:{Accept:"application/json"}});
+  if(!r.ok) throw new Error("HTTP "+r.status); return r.json();
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+function scoreMarket(m, book, fetchedAt){
+  const yes=(book&&book.yes)||[], no=(book&&book.no)||[];
+  const by = yes.length?yes[yes.length-1]:null, bn = no.length?no[no.length-1]:null;
+  if(!by||!bn) return null;
+  const yesPx=by[0], noPx=bn[0], depth=Math.min(by[1],bn[1]);
+  const gap = 100-(yesPx+noPx);
+  const slip = depth>=MIN_DEPTH?0:Math.min(Math.max(gap,0),(MIN_DEPTH-depth)*0.15);
+  const netEdge = gap-(FEE_CENTS*2)-slip;
+  const ageMs = Date.now()-fetchedAt;
+  const okFees=netEdge>0, okDepth=depth>=MIN_DEPTH, okFresh=ageMs<=STALE_MS;
+  const reasons=[];
+  if(gap<=0) reasons.push("no gap"); else if(!okFees) reasons.push("fees>edge");
+  if(!okDepth) reasons.push("thin "+depth);
+  if(!okFresh) reasons.push("stale");
+  const verdict=(okFees&&okDepth&&okFresh)?"go":(okFees||(gap>FEE_CENTS*2&&okDepth))?"warn":"no";
+  return {ticker:m.ticker,title:m.title||m.ticker,yesPx,noPx,gap,netEdge,depth,ageMs,verdict,okFees,okDepth,okFresh,reasons};
+}
+
+function meter(s){
+  const seg=(ok)=>'<i class="'+(ok?'ok':'bad')+'"></i>';
+  return '<div class="meter" title="fees \u00b7 depth \u00b7 freshness">'+seg(s.okFees)+seg(s.okDepth)+seg(s.okFresh)+'</div>';
+}
+
+function render(signals){
+  const rows=$("rows");
+  if(!signals.length){rows.innerHTML='<div class="empty">No markets returned book data this scan.</div>';return;}
+  const order={go:0,warn:1,no:2};
+  signals.sort((a,b)=>order[a.verdict]-order[b.verdict]||b.netEdge-a.netEdge);
+  const clean=signals.filter(s=>s.verdict==="go").length;
+  const flag=signals.filter(s=>s.verdict==="no").length;
+  const ages=signals.map(s=>s.ageMs).sort((a,b)=>a-b);
+  const med=ages.length?Math.round(ages[Math.floor(ages.length/2)]/1000):0;
+  $("sScanned").textContent=signals.length;
+  $("sClean").textContent=clean;
+  $("sFlag").textContent=flag;
+  $("sAge").innerHTML=med+'<span class="u">s</span>';
+  rows.innerHTML=signals.map(function(s){
+    const vTxt=s.verdict==="go"?"CLEAN":s.verdict==="warn"?"MARGINAL":"FLAGGED";
+    const why=s.reasons.length?' <span class="why">\u00b7 '+esc(s.reasons.join(" \u00b7 "))+'</span>':"";
+    return '<div class="row '+s.verdict+'">'+
+      '<div class="mkt"><div class="t">'+esc(s.title)+'</div><div class="tk">'+esc(s.ticker)+'</div></div>'+
+      '<div class="num" data-l="YES / NO">'+s.yesPx+'\u00a2 <span class="sm">/</span> '+s.noPx+'\u00a2</div>'+
+      '<div class="num" data-l="Book gap">'+s.gap.toFixed(0)+'\u00a2</div>'+
+      '<div class="num edge '+(s.netEdge>0?'pos':'neg')+'" data-l="Net edge">'+(s.netEdge>0?'+':'')+s.netEdge.toFixed(1)+'\u00a2</div>'+
+      '<div class="num" data-l="Depth">'+s.depth+'</div>'+
+      '<div class="integ" data-l="Integrity">'+meter(s)+'<div class="vlabel '+s.verdict+'">'+vTxt+why+'</div></div>'+
+    '</div>';
+  }).join("");
+}
+
+async function scan(){
+  $("refreshBtn").disabled=true;
+  setConn("","scanning");
+  $("rows").innerHTML='<div class="empty"><span class="spin"></span>Pulling live order books&hellip;</div>';
+  try{
+    const mk=await getJSON(API+"/markets?limit="+SCAN_LIMIT+"&status=open");
+    const markets=(mk.markets||[]).filter(function(m){return m.ticker;});
+    if(!markets.length){setConn("err","no markets");$("rows").innerHTML='<div class="empty">No open markets right now.</div>';return;}
+    const signals=[];
+    for(const m of markets){
+      try{
+        const ob=await getJSON(API+"/markets/"+m.ticker+"/orderbook");
+        const s=scoreMarket(m, ob.orderbook||ob, Date.now());
+        if(s) signals.push(s);
+      }catch(e){}
+      await new Promise(function(r){setTimeout(r,40);});
+    }
+    render(signals);
+    setConn("live","live");
+    $("lastSync").textContent=new Date().toLocaleTimeString();
+  }catch(e){
+    setConn("err","offline");
+    const cors=(e.message==="Failed to fetch"||e.name==="TypeError");
+    $("rows").innerHTML='<div class="empty err">Couldn\'t reach Kalshi from the browser.<br><br>'+
+      (cors?'Kalshi\'s CORS policy likely blocks direct browser reads (<code>'+esc(e.message)+'</code>).<br>Run it behind a small local proxy, or fetch server-side and point this at your own endpoint.'
+        :'<code>'+esc(e.message)+'</code>')+'</div>';
+  }finally{ $("refreshBtn").disabled=false; }
+}
+
+$("refreshBtn").onclick=scan;
+$("autoBtn").onclick=function(){
+  if(auto){clearInterval(auto);auto=null;this.textContent="Auto \u00b7 off";this.classList.remove("on");}
+  else{scan();auto=setInterval(scan,30000);this.textContent="Auto \u00b7 30s";this.classList.add("on");}
+};
+scan();
+</script>
+</body>
+</html>
