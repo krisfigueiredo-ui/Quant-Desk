@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quant Desk — Research Operations</title>
+<style>
+:root{
+  --bg:#0b0d10; --card:#12161b; --raised:#171c22; --line:#252c36;
+  --text:#e7eaf0; --muted:#8b949e; --accent:#60a5fa; --green:#22c55e;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5;padding:0 24px 56px;max-width:1040px;margin:0 auto;-webkit-font-smoothing:antialiased}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:42px 0 28px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:13px}
+.mark{width:34px;height:34px;border:1px solid #344050;border-radius:9px;background:var(--raised);display:grid;place-items:center}
+.mark svg{width:18px;height:18px;color:var(--accent)}
+h1{font-size:21px;letter-spacing:-.35px;margin-bottom:2px;font-weight:650}
+.sub{color:var(--muted);font-size:13px}
+.status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;border:1px solid var(--line);border-radius:999px;padding:7px 11px;background:var(--card);white-space:nowrap}
+.status::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green)}
+.intro{padding:30px 0 22px;display:grid;grid-template-columns:1.35fr .65fr;gap:24px;align-items:end}
+.intro h2{font-size:28px;line-height:1.22;letter-spacing:-.65px;font-weight:600;max-width:590px}
+.intro p{font-size:13px;color:var(--muted);line-height:1.65}
+.note{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:11px 14px;margin:0 0 18px;background:var(--card)}
+.note b{color:var(--green)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+a.card{display:flex;min-height:190px;flex-direction:column;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;text-decoration:none;color:var(--text);transition:border-color .15s,background .15s,transform .15s}
+a.card:hover{border-color:#3a4656;background:var(--raised);transform:translateY(-1px)}
+a.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card .topline{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.card h3{font-size:17px;margin:10px 0 6px;font-weight:600;letter-spacing:-.2px}
+.card p{font-size:13px;color:var(--muted);max-width:42ch}
+.card .open{font-size:12px;color:var(--accent);margin-top:24px}
+.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:18px}
+.meta div{background:var(--card);padding:13px 14px}
+.meta span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.meta b{font-size:12px;font-weight:500}
+footer{display:flex;justify-content:space-between;gap:20px;margin-top:32px;padding-top:20px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+footer a{color:var(--accent)}
+@media(max-width:720px){body{padding-inline:16px}header{padding-top:28px}.intro{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.meta{grid-template-columns:1fr}footer{flex-direction:column}.status{display:none}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 17.5 9 12l3 3 7-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7h4v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+    <div><h1>Quant Desk</h1><p class="sub">Systematic research operations</p></div>
+  </div>
+  <div class="status">Paper environment</div>
+</header>
+<section class="intro">
+  <h2>Research, execution monitoring, and market-quality diagnostics in one workspace.</h2>
+  <p>Built for repeatable paper-trading workflows. Hosted views are read-only and no live-money order path is exposed.</p>
+</section>
+<div class="note"><b>Paper trading only.</b> The hosted account monitor uses representative demo data. Live paper-account data is available through the repository&rsquo;s local read-only proxy, which keeps credentials off the page.</div>
+<div class="cards">
+  <a class="card" href="dashboards/bot_dashboard.html">
+    <div><div class="topline">Portfolio operations</div><h3>Paper account monitor</h3><p>Review equity, open positions, risk levels, and recent orders. Hosted demo included; local mode connects securely to Alpaca paper.</p></div>
+    <div class="open">Open monitor &rarr;</div>
+  </a>
+  <a class="card" href="dashboards/kalshi_signals.html">
+    <div><div class="topline">Market structure</div><h3>Kalshi signal scanner</h3><p>Screen public two-sided books for fee-adjusted gaps, executable depth, and quote freshness.</p></div>
+    <div class="open">Open scanner &rarr;</div>
+  </a>
+</div>
+<div class="meta">
+  <div><span>Execution</span><b>Dry-run by default</b></div>
+  <div><span>Market snapshot</span><b>Scheduled every 15 min</b></div>
+  <div><span>Account access</span><b>Read-only local proxy</b></div>
+</div>
+<footer><span>Research and paper-trading software. Not investment advice.</span><a href="https://github.com/krisfigueiredo-ui/Quant-Desk">View source on GitHub</a></footer>
+</body>
+</html>

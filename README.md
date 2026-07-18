@@ -1,64 +1,78 @@
 # Quant Desk
 
-A paper-trading research desk: screen equities and crypto with a factor/momentum model,
-paper-trade them on **Alpaca**, guard positions with a daily stop/take-profit manager, and
-watch it all from a read-only dashboard.
+Quant Desk is a paper-trading research workspace for equity and crypto factor strategies, scheduled Alpaca paper execution, position-risk monitoring, and prediction-market liquidity analysis.
 
-> Research and **paper trading only**. Not a live-money system, not investment advice, no promise
-> of returns. Everything is hard-locked to Alpaca's paper environment.
+**Live dashboard:** https://krisfigueiredo-ui.github.io/Quant-Desk/
 
-## What's inside
+> Research and paper trading only. The project has no live-money configuration and does not provide investment advice.
 
-| Path | What it does |
-|------|--------------|
-| `bots/auto_paper_trader.py` | Equity factor strategy (momentum/trend/quality/value), monthly rebalance |
-| `bots/auto_paper_trader_crypto.py` | Crypto momentum + trend filter, weekly rebalance |
-| `bots/exit_manager.py` | Daily stop-loss / take-profit guard across all positions |
-| `dashboards/bot_dashboard.html` | Live read-only monitor — open in a browser, paste paper keys |
-| `dashboards/kalshi_signals.html` | Kalshi arbitrage signal scanner (public data) |
-| `notebooks/impact_quant_strategy.ipynb` | Full research: factors, grades, backtest, costs/decay, Monte Carlo, ML |
-| `notebooks/Colab_Launcher.ipynb` | One-tab Colab runner for the bots |
-| `.github/workflows/paper_bots.yml` | Schedules the three bots on GitHub Actions |
+## Repository map
 
-## Quick start
+| Path | Purpose |
+|---|---|
+| `bots/auto_paper_trader.py` | Equity factor strategy with monthly rebalancing |
+| `bots/auto_paper_trader_crypto.py` | Crypto momentum and trend strategy with weekly rebalancing |
+| `bots/exit_manager.py` | Daily stop-loss and take-profit checks |
+| `dashboards/bot_dashboard.html` | Read-only paper-account monitor with a hosted demo mode |
+| `dashboards/kalshi_signals.html` | Fee, depth, and freshness checks over public Kalshi quotes |
+| `scripts/local_dashboard_server.py` | Local static server and read-only Alpaca proxy |
+| `scripts/fetch_kalshi_snapshot.py` | Server-side public market snapshot generator |
+| `notebooks/impact_quant_strategy.ipynb` | Factor research, backtests, cost analysis, Monte Carlo, and ML experiments |
+| `.github/workflows/paper_bots.yml` | Scheduled dry-run paper bots |
+| `.github/workflows/pages.yml` | Dashboard deployment and 15-minute public snapshot refresh |
+
+## Strategy setup
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env        # edit .env with your Alpaca PAPER keys
-set -a && source .env && set +a
-python bots/auto_paper_trader.py     # dry run — logs intended orders, submits nothing
+cp .env.example .env
 ```
 
-Get **paper** keys at [alpaca.markets](https://alpaca.markets) → Paper Trading → API Keys.
+Add Alpaca **paper** credentials to `.env`, load them into the shell, and run a dry-run strategy:
 
-## Run it hands-off (recommended)
+```bash
+set -a
+source .env
+set +a
+python3 bots/auto_paper_trader.py
+```
 
-Schedule the bots on GitHub Actions so nothing needs to run on your computer:
+`DRY_RUN=true` is the default. Intended orders are logged but not submitted.
 
-1. Push this repo (private).
-2. Repo → Settings → Secrets and variables → Actions → add `ALPACA_API_KEY`,
-   `ALPACA_SECRET_KEY` (and optional `SLACK_WEBHOOK_URL`, `EMAIL_*`).
-3. The workflow ships with `DRY_RUN: "true"`. Watch a summary or two, then set it to `"false"`.
+## Account monitor
 
-The equity bot acts on the first trading day of each month, crypto on Mondays, and the exit
-manager runs daily. Most days you'll just get a "holding" email — silence means something broke.
+The GitHub Pages version uses representative data so the dashboard is useful without asking for credentials in a public page. For live paper-account data, start the local read-only proxy:
 
-## The monitor
+```bash
+set -a
+source .env
+set +a
+python3 scripts/local_dashboard_server.py --port 8000
+```
 
-Open `dashboards/bot_dashboard.html` in any browser and paste your paper keys. It's read-only:
-it shows equity, positions (each plotted between its stop and take-profit), and recent orders.
-It talks only to `paper-api.alpaca.markets` and contains no order-placement code.
+Open `http://127.0.0.1:8000/dashboards/bot_dashboard.html`. Credentials stay in the Python process. The browser only receives account, position, and recent-order responses; the proxy exposes no order-entry route.
 
-## Safety model
+## Kalshi snapshot
 
-- **Paper-locked:** every client is `paper=True`. Live keys won't authenticate against the paper endpoint.
-- **Dry-run first:** `DRY_RUN=true` logs intended trades without submitting.
-- **Secrets stay out of git:** `.env` and `*.log` are gitignored; keys are read from the environment.
-- **Honest research:** the notebook is built to reveal when a strategy *doesn't* work — near-zero
-  information coefficients, failing significance tests, ML losing to the simple rule. Keep it that way.
+Browsers cannot reliably call Kalshi's API from GitHub Pages because of cross-origin restrictions. The Pages workflow therefore fetches public top-of-book data server-side every 15 minutes, normalizes current and legacy quote fields, and publishes `data/kalshi_snapshot.json`. The dashboard polls that static snapshot automatically.
 
-## Discipline
+Generate a local snapshot with:
 
-Paper-trade ~90 days / 100+ trades, then compare results to buy-and-hold before considering real
-capital. If the evidence isn't there, that's the finding — and you learned it for free.
+```bash
+python3 scripts/fetch_kalshi_snapshot.py
+python3 -m http.server 8000
+```
+
+## GitHub Actions
+
+Add `ALPACA_API_KEY` and `ALPACA_SECRET_KEY` under **Settings → Secrets and variables → Actions**. Notification secrets are optional. The bot workflow remains dry-run until `DRY_RUN` is deliberately changed.
+
+## Safety controls
+
+- Every Alpaca client is configured for the paper environment.
+- Automated jobs default to dry-run.
+- `.env`, keys, logs, caches, and editor files are ignored by Git.
+- The hosted site never requests or stores account credentials.
+- Dashboard API access is read-only; no route can place, change, or cancel an order.

@@ -1,0 +1,27 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets*
+
+# Bot output
+*.log
+paper_trader*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
