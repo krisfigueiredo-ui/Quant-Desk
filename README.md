@@ -4,6 +4,10 @@ A paper-trading research desk: screen equities and crypto with a factor/momentum
 paper-trade them on **Alpaca**, guard positions with a daily stop/take-profit manager, and
 watch it all from a read-only dashboard.
 
+**Live dashboards:** https://krisfigueiredo-ui.github.io/Quant-Desk/ — the bot monitor and the
+Kalshi signal scanner, deployed automatically from `main` via GitHub Pages. Keys you paste into
+the monitor stay in your browser.
+
 > Research and **paper trading only**. Not a live-money system, not investment advice, no promise
 > of returns. Everything is hard-locked to Alpaca's paper environment.
 
