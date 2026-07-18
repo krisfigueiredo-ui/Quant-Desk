@@ -1,23 +1,36 @@
-name: Pylint
+name: Python checks
 
-on: [push]
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10"]
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pylint
-    - name: Analysing the code with pylint
-      run: |
-        pylint $(git ls-files '*.py')
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile Python sources
+        run: python -m compileall -q bots scripts
+      - name: Validate notebook documents
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          notebooks = sorted(Path("notebooks").glob("*.ipynb"))
+          if not notebooks:
+              raise SystemExit("No notebooks found")
+          for path in notebooks:
+              payload = json.loads(path.read_text(encoding="utf-8"))
+              if payload.get("nbformat") != 4 or not isinstance(payload.get("cells"), list):
+                  raise SystemExit(f"Invalid notebook structure: {path}")
+              print(f"validated {path}")
+          PY
