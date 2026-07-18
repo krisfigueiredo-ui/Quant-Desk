@@ -4,60 +4,60 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Paper Desk</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#F4F6F9; --card:#FFFFFF; --ink:#101826; --sub:#5B6B82; --faint:#93A1B5;
-    --line:#E4E9F0; --cobalt:#2B50F0; --cobalt-soft:#EEF2FF;
-    --up:#0E9F6E; --up-soft:#E7F6F0; --down:#E5484D; --down-soft:#FDECEC;
-    --warn:#B7791F; --warn-soft:#FBF3E4;
-    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
-    --disp:"Sora",system-ui,sans-serif;
-    --r:16px; --shadow:0 1px 2px rgba(16,24,38,.05),0 8px 24px rgba(16,24,38,.06);
+    --paper:#0b0d10; --card:#12161b; --ink:#e7eaf0; --sub:#8b949e; --faint:#667085;
+    --line:#252c36; --cobalt:#60a5fa; --cobalt-soft:rgba(96,165,250,.12);
+    --up:#22c55e; --up-soft:rgba(34,197,94,.12); --down:#ef4444; --down-soft:rgba(239,68,68,.12);
+    --warn:#f59e0b; --warn-soft:rgba(245,158,11,.12);
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+    --disp:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --r:12px; --shadow:none;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--paper);color:var(--ink);font-family:var(--disp);line-height:1.5;
     -webkit-font-smoothing:antialiased;padding-bottom:64px}
-  .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 22px}
 
-  header{padding:22px 0 0}
+  header{position:sticky;top:0;z-index:20;padding:0;background:rgba(11,13,16,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .head{min-height:66px}
   .head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
   .brand{display:flex;align-items:center;gap:11px}
-  .mark{width:34px;height:34px;border-radius:10px;background:var(--cobalt);position:relative;flex:none}
+  .mark{width:34px;height:34px;border-radius:9px;background:#171c22;border:1px solid #344050;position:relative;flex:none}
   .mark::after{content:"";position:absolute;inset:0;margin:auto;width:12px;height:12px;
-    border:2.5px solid #fff;border-radius:50%}
+    border:2px solid var(--cobalt);border-radius:50%}
   .brand h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
   .brand .sub{font-size:11.5px;color:var(--sub)}
+  .brand .sub a{color:inherit;text-decoration:none}.brand .sub a:hover{color:var(--cobalt)}
   .tools{display:flex;gap:8px;align-items:center}
   .pill{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--sub);
-    background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 13px}
+    background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 11px}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--faint)}
   .dot.on{background:var(--up)} .dot.err{background:var(--down)}
   .btn{font-family:var(--disp);font-size:12.5px;font-weight:500;color:var(--ink);background:var(--card);
-    border:1px solid var(--line);border-radius:999px;padding:8px 15px;cursor:pointer;transition:.15s}
+    border:1px solid var(--line);border-radius:8px;padding:8px 13px;cursor:pointer;transition:.15s}
   .btn:hover{border-color:var(--cobalt);color:var(--cobalt)}
   .btn:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px}
-  .btn.primary{background:var(--cobalt);border-color:var(--cobalt);color:#fff}
+  .btn.primary{background:var(--cobalt);border-color:var(--cobalt);color:#08101a}
   .btn.primary:hover{filter:brightness(1.06);color:#fff}
   .btn.on{background:var(--cobalt-soft);border-color:var(--cobalt);color:var(--cobalt)}
 
   /* verdict hero */
-  .verdict{margin:26px 0 0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);
-    box-shadow:var(--shadow);padding:26px 28px;display:flex;justify-content:space-between;
+  .verdict{margin:24px 0 0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    box-shadow:var(--shadow);padding:22px 24px;display:flex;justify-content:space-between;
     gap:22px;align-items:center;flex-wrap:wrap}
   .verdict .line{font-size:clamp(19px,3vw,26px);font-weight:600;letter-spacing:-.02em;max-width:24ch}
   .verdict .line .hl{color:var(--cobalt)}
   .verdict .line .bad{color:var(--down)}
   .verdict .line .good{color:var(--up)}
-  .eq{text-align:right}
-  .eq .k{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.08em}
-  .eq .v{font-family:var(--mono);font-size:clamp(24px,3.4vw,32px);font-weight:600;letter-spacing:-.02em}
-  .eq .d{font-family:var(--mono);font-size:13px;margin-top:2px}
+  .verdict-meta{text-align:right;min-width:180px}
+  .verdict-meta .k{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.08em}
+  .verdict-meta .v{font-size:12px;font-weight:600;margin-top:4px}
+  .verdict-meta .d{font-family:var(--mono);font-size:10px;color:var(--sub);margin-top:3px}
   .up-t{color:var(--up)} .down-t{color:var(--down)}
 
   /* stat strip */
-  .strip{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0 0}
+  .strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:12px 0 0}
   .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
     box-shadow:var(--shadow);padding:16px 20px}
   .stat .k{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.08em}
@@ -91,7 +91,7 @@
     background:linear-gradient(90deg,var(--down-soft),var(--line) 30%,var(--line) 70%,var(--up-soft))}
   .rail .entry{position:absolute;top:10px;width:2px;height:14px;background:var(--faint);border-radius:1px}
   .rail .now{position:absolute;top:9px;width:16px;height:16px;border-radius:50%;background:var(--cobalt);
-    border:3px solid #fff;box-shadow:0 1px 4px rgba(16,24,38,.3);transform:translateX(-8px)}
+    border:3px solid var(--card);box-shadow:0 1px 4px rgba(0,0,0,.3);transform:translateX(-8px)}
   .rail .lbl{position:absolute;top:-4px;font-family:var(--mono);font-size:9.5px;color:var(--faint)}
   .rail .lbl.r{right:0} .rail .lbl.c{left:50%;transform:translateX(-50%)}
 
@@ -117,7 +117,7 @@
     color:var(--sub);display:block;margin:14px 0 6px}
   .connect input{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 13px;
     font-family:var(--mono);font-size:13px;background:var(--paper);color:var(--ink)}
-  .connect input:focus{outline:none;border-color:var(--cobalt);background:#fff}
+  .connect input:focus{outline:none;border-color:var(--cobalt);background:#171c22}
   .connect .btn{width:100%;margin-top:20px;padding:12px}
   .fine{font-size:11.5px;color:var(--sub);margin-top:16px;line-height:1.55;
     border-top:1px solid var(--line);padding-top:14px}
@@ -130,7 +130,8 @@
     display:inline-block;animation:spin .7s linear infinite;vertical-align:-3px;margin-right:8px}
   @keyframes spin{to{transform:rotate(360deg)}}
   .foot{text-align:center;font-size:11px;color:var(--faint);padding-top:30px}
-  @media(max-width:720px){.strip{grid-template-columns:1fr}.verdict{padding:20px}.eq{text-align:left}}
+  @media(max-width:900px){.strip{grid-template-columns:repeat(2,1fr)}.stat:last-child{grid-column:1/-1}}
+  @media(max-width:720px){.wrap{padding-inline:16px}.strip{grid-template-columns:1fr}.stat:last-child{grid-column:auto}.verdict{padding:20px}.verdict-meta{text-align:left}.tools{width:100%;overflow-x:auto;padding-bottom:2px}.ord{grid-template-columns:auto 1fr}.ord .amt,.ord .st{grid-column:2;text-align:left}.pos-mid{gap:10px;flex-wrap:wrap}}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -139,66 +140,62 @@
   <div class="wrap head">
     <div class="brand">
       <div class="mark" aria-hidden="true"></div>
-      <div><h1>Paper Desk</h1><div class="sub">Live monitor · read-only · paper account</div></div>
+      <div><h1>Paper Account Monitor</h1><div class="sub"><a href="../index.html">Quant Desk</a> / portfolio operations</div></div>
     </div>
-    <div class="tools" id="toolbar" style="display:none">
-      <span class="pill"><span class="dot" id="dot"></span><span id="connTxt">live</span></span>
+    <div class="tools" id="toolbar">
+      <span class="pill"><span class="dot" id="dot"></span><span id="connTxt">checking</span></span>
       <button class="btn" id="refreshBtn">Refresh</button>
-      <button class="btn" id="autoBtn">Auto off</button>
-      <button class="btn" id="disconnectBtn">Disconnect</button>
+      <button class="btn on" id="autoBtn">Auto 60s</button>
     </div>
   </div>
 </header>
 
 <div class="wrap">
 
-  <!-- connect -->
-  <div class="connect" id="connectCard">
-    <h2>Connect your paper account</h2>
-    <p>Paste your Alpaca <b>paper</b> keys to see what the bots are doing.</p>
-    <label for="keyIn">Paper API key</label>
-    <input id="keyIn" type="password" autocomplete="off" placeholder="PK…">
-    <label for="secIn">Paper secret key</label>
-    <input id="secIn" type="password" autocomplete="off" placeholder="Secret">
-    <button class="btn primary" id="connectBtn">Connect</button>
-    <div id="connErr" class="empty err" style="display:none;padding:14px 0 0"></div>
-    <div class="fine"><b>Paper keys only — enforced.</b> This page talks exclusively to
-      paper-api.alpaca.markets; live keys won't authenticate there. Keys stay in this tab's memory
-      for the session and are never stored or sent anywhere else. The page is <b>read-only</b> —
-      it can display activity but cannot place, change, or cancel orders.</div>
-  </div>
-
   <!-- desk -->
-  <div id="desk" style="display:none">
+  <div id="desk">
     <div class="verdict">
       <div class="line" id="verdictLine">Checking positions…</div>
-      <div class="eq">
-        <div class="k">Equity</div>
-        <div class="v" id="gEquity">—</div>
-        <div class="d" id="gDay">—</div>
+      <div class="verdict-meta">
+        <div class="k">Data source</div>
+        <div class="v" id="modeLabel">Checking connection</div>
+        <div class="d" id="lastUpdated">Not updated</div>
       </div>
     </div>
 
     <div class="strip">
+      <div class="stat"><div class="k">Equity</div><div class="v" id="gEquity">—</div></div>
+      <div class="stat"><div class="k">Day P&amp;L</div><div class="v" id="gDay">—</div></div>
       <div class="stat"><div class="k">Cash</div><div class="v" id="gCash">—</div></div>
-      <div class="stat"><div class="k">Invested</div><div class="v" id="gInv">—</div></div>
+      <div class="stat"><div class="k">Gross exposure</div><div class="v" id="gGross">—</div></div>
       <div class="stat"><div class="k">Open positions</div><div class="v" id="gPos">—</div></div>
     </div>
 
-    <h2>Positions <span class="note">each shown between its stop (−15%) and take-profit (+40%)</span></h2>
+    <h2>Positions <span class="note">configured range: −15% stop / +40% take-profit</span></h2>
     <div class="grid" id="posGrid"><div class="empty"><span class="spin"></span>Loading…</div></div>
 
-    <h2>Recent orders <span class="note">what the bots actually did</span></h2>
+    <h2>Recent orders <span class="note">latest paper-account activity</span></h2>
     <div class="orders" id="orders"><div class="empty">—</div></div>
   </div>
 
-  <div class="foot">Read-only monitor · Alpaca paper API · not investment advice</div>
+  <div class="foot">Hosted mode uses representative data · Local mode uses a read-only Alpaca proxy · No order-entry controls</div>
 </div>
 
 <script>
-const BASE = "https://paper-api.alpaca.markets";  // paper endpoint — hard-coded on purpose
+const BASE = "/api/alpaca";
 const STOP = 0.15, TAKE = 0.40;                   // mirror exit_manager.py
-let KEY = "", SEC = "", auto = null;
+let MODE = "demo", auto = null;
+const DEMO = {
+  account:{equity:"105423.50",last_equity:"104980.12",cash:"42780.30"},
+  positions:[
+    {symbol:"SPY",qty:"72",avg_entry_price:"584.20",current_price:"591.85",market_value:"42613.20"},
+    {symbol:"QQQ",qty:"35",avg_entry_price:"559.40",current_price:"572.29",market_value:"20030.15"}
+  ],
+  orders:[
+    {side:"buy",symbol:"QQQ",qty:"35",filled_avg_price:"559.40",status:"filled",submitted_at:new Date(Date.now()-86400000).toISOString()},
+    {side:"buy",symbol:"SPY",qty:"72",filled_avg_price:"584.20",status:"filled",submitted_at:new Date(Date.now()-172800000).toISOString()}
+  ]
+};
 const $ = id => document.getElementById(id);
 const money = n => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString(undefined,
   {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -209,9 +206,7 @@ function setConn(state, txt){
   $("connTxt").textContent = txt;
 }
 async function api(path){
-  const r = await fetch(BASE + path, {headers: {
-    "APCA-API-KEY-ID": KEY, "APCA-API-SECRET-KEY": SEC, "Accept": "application/json"}});
-  if (r.status === 401 || r.status === 403) throw new Error("auth");
+  const r = await fetch(BASE + path, {headers:{"Accept":"application/json"},cache:"no-store"});
   if (!r.ok) throw new Error("HTTP " + r.status);
   return r.json();
 }
@@ -232,38 +227,39 @@ function railHTML(pnl){
 
 function verdict(positions){
   if (!positions.length)
-    return 'In <span class="hl">cash</span> — no open positions right now.';
+    return 'No open positions in the paper account.';
   let alert = 0, watch = 0;
   for (const p of positions){
     const pnl = parseFloat(p.current_price)/parseFloat(p.avg_entry_price) - 1;
     if (pnl <= -STOP*0.66 || pnl >= TAKE*0.9) alert++;
     else if (pnl <= -STOP*0.4 || pnl >= TAKE*0.7) watch++;
   }
-  if (alert) return `<span class="bad">${alert} position${alert>1?"s":""}</span> near an exit — check below.`;
-  if (watch) return `<span class="hl">${watch} position${watch>1?"s":""}</span> drifting toward a level. Worth a glance.`;
-  return 'All clear — <span class="good">nothing near an exit.</span>';
+  if (alert) return `<span class="bad">${alert} position${alert>1?"s":""}</span> approaching an exit threshold.`;
+  if (watch) return `<span class="hl">${watch} position${watch>1?"s":""}</span> within the risk-monitoring range.`;
+  return '<span class="good">Positions remain within configured risk limits.</span>';
 }
 
 async function refresh(){
   $("refreshBtn").disabled = true;
   try{
-    const [acct, positions, orders] = await Promise.all([
-      api("/v2/account"), api("/v2/positions"),
-      api("/v2/orders?status=all&limit=15&direction=desc")
-    ]);
+    const [acct, positions, orders] = MODE === "live"
+      ? await Promise.all([api("/account"),api("/positions"),api("/orders")])
+      : [DEMO.account,DEMO.positions,DEMO.orders];
     const eq = parseFloat(acct.equity), last = parseFloat(acct.last_equity) || eq;
     const day = eq - last, cash = parseFloat(acct.cash);
     $("gEquity").textContent = money(eq);
-    $("gDay").textContent = (day >= 0 ? "+" : "") + money(day) + " today";
-    $("gDay").className = "d " + (day >= 0 ? "up-t" : "down-t");
+    $("gDay").textContent = (day >= 0 ? "+" : "") + money(day);
+    $("gDay").className = "v " + (day >= 0 ? "up-t" : "down-t");
     $("gCash").textContent = money(cash);
-    $("gInv").textContent = money(eq - cash);
+    $("gGross").textContent = money(positions.reduce((sum,p)=>sum+Math.abs(parseFloat(p.market_value)||0),0));
     $("gPos").textContent = positions.length;
     $("verdictLine").innerHTML = verdict(positions);
+    $("modeLabel").textContent = MODE === "live" ? "Alpaca paper account" : "Hosted demo snapshot";
+    $("lastUpdated").textContent = "Updated " + new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"});
 
     const grid = $("posGrid");
     if (!positions.length){
-      grid.innerHTML = '<div class="empty">No open positions — the bots are in cash or haven\u2019t rebalanced yet.</div>';
+      grid.innerHTML = '<div class="empty">No open positions in the paper account.</div>';
     } else {
       grid.innerHTML = positions.map(p => {
         const entry = parseFloat(p.avg_entry_price), cur = parseFloat(p.current_price);
@@ -290,7 +286,7 @@ async function refresh(){
 
     const ord = $("orders");
     if (!orders.length){
-      ord.innerHTML = '<div class="empty">No orders yet — the first rebalance hasn\u2019t fired.</div>';
+      ord.innerHTML = '<div class="empty">No recent paper-account orders.</div>';
     } else {
       ord.innerHTML = orders.map(o => {
         const amt = o.notional ? money(parseFloat(o.notional))
@@ -305,41 +301,30 @@ async function refresh(){
         </div>`;
       }).join("");
     }
-    setConn("on", "live");
+    setConn("on", MODE === "live" ? "live · auto" : "demo · auto");
   } catch (e){
-    if (e.message === "auth"){
-      setConn("err", "keys rejected");
-      $("posGrid").innerHTML = '<div class="empty err">Keys were rejected by the paper endpoint. Check they\u2019re the <b>paper</b> keys from Alpaca\u2019s Paper Trading dashboard.</div>';
-    } else {
-      setConn("err", "offline");
-      $("posGrid").innerHTML = `<div class="empty err">Couldn\u2019t reach Alpaca: <code>${esc(e.message)}</code><br>If your network blocks the request, open this file from your own computer instead.</div>`;
-    }
+    MODE = "demo";
+    setConn("", "demo · proxy unavailable");
+    return refresh();
   } finally { $("refreshBtn").disabled = false; }
 }
 
-$("connectBtn").onclick = async () => {
-  KEY = $("keyIn").value.trim(); SEC = $("secIn").value.trim();
-  const err = $("connErr"); err.style.display = "none";
-  if (!KEY || !SEC){ err.textContent = "Enter both keys to connect."; err.style.display = "block"; return; }
-  $("connectBtn").disabled = true; $("connectBtn").textContent = "Connecting…";
-  try{
-    await api("/v2/account");
-    $("connectCard").style.display = "none";
-    $("desk").style.display = ""; $("toolbar").style.display = "flex";
-    refresh();
-  } catch (e){
-    err.textContent = e.message === "auth"
-      ? "Those keys were rejected — make sure they're paper keys, not live."
-      : "Couldn't reach Alpaca from this network.";
-    err.style.display = "block";
-  } finally { $("connectBtn").disabled = false; $("connectBtn").textContent = "Connect"; }
+$("refreshBtn").onclick = async function(){
+  if(MODE === "demo"){
+    try{ await api("/account"); MODE = "live"; }catch(e){}
+  }
+  refresh();
 };
-$("refreshBtn").onclick = refresh;
 $("autoBtn").onclick = function(){
-  if (auto){ clearInterval(auto); auto = null; this.textContent = "Auto off"; this.classList.remove("on"); }
+  if (auto){ clearInterval(auto); auto = null; this.textContent = "Auto off"; this.classList.remove("on"); setConn(MODE==="live"?"on":"",MODE); }
   else { refresh(); auto = setInterval(refresh, 60000); this.textContent = "Auto 60s"; this.classList.add("on"); }
 };
-$("disconnectBtn").onclick = () => { KEY = SEC = ""; location.reload(); };
+async function boot(){
+  try{ await api("/account"); MODE = "live"; }catch(e){ MODE = "demo"; }
+  await refresh();
+  auto = setInterval(refresh,60000);
+}
+boot();
 </script>
 </body>
 </html>
