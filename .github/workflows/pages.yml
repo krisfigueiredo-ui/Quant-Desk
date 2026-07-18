@@ -1,0 +1,47 @@
+name: Deploy dashboards to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  schedule:
+    # Refresh the browser-safe public market snapshot throughout the day.
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Refresh public Kalshi snapshot
+        run: python scripts/fetch_kalshi_snapshot.py
+      - uses: actions/configure-pages@v5
+        with:
+          # Self-enable Pages (source: GitHub Actions) on first run.
+          enablement: true
+      - name: Stage static site (landing page + read-only dashboards)
+        run: |
+          mkdir -p _site/dashboards _site/data
+          cp index.html _site/
+          cp dashboards/*.html _site/dashboards/
+          cp data/kalshi_snapshot.json _site/data/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
