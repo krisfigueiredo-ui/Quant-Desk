@@ -1,0 +1,56 @@
+name: Paper trading bots
+
+on:
+  schedule:
+    # Daily at 15:35 UTC (~10:35-11:35 ET depending on DST, after US market open).
+    # Each bot decides for itself whether today is its day: the equity bot acts
+    # on the first trading day of the month, crypto on Mondays, and the exit
+    # manager every run. Off-days just log "holding" and notify.
+    - cron: "35 15 * * *"
+  workflow_dispatch:
+
+# Paper trading only. Every bot constructs TradingClient(..., paper=True) and
+# DRY_RUN defaults to true — flip the env below to "false" only after watching
+# a few dry-run summaries.
+env:
+  DRY_RUN: "true"
+  ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+  ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  EMAIL_TO: ${{ secrets.EMAIL_TO }}
+  EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+  EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
+
+jobs:
+  equity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python bots/auto_paper_trader.py
+
+  crypto:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python bots/auto_paper_trader_crypto.py
+
+  exit-manager:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python bots/exit_manager.py

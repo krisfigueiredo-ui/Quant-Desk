@@ -1,0 +1,17 @@
+# secrets — keys live in the environment, never in git
+.env
+
+# logs
+*.log
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# notebooks
+.ipynb_checkpoints/
+
+# os cruft
+.DS_Store
