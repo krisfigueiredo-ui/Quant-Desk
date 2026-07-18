@@ -4,38 +4,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kalshi Signal Desk</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --void:#0a0e16; --slate:#141b27; --slate2:#0f1620; --line:#1f2a39; --line2:#283648;
-    --ink:#e8eef6; --mute:#6b7c93; --faint:#43546b;
-    --phosphor:#5eead4; --gold:#fbbf24; --coral:#fb6f70; --green:#34d399;
-    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-    --disp:"Space Grotesk",system-ui,sans-serif;
+    --void:#0b0d10; --slate:#171c22; --slate2:#12161b; --line:#252c36; --line2:#344050;
+    --ink:#e7eaf0; --mute:#8b949e; --faint:#667085;
+    --phosphor:#60a5fa; --gold:#f59e0b; --coral:#ef4444; --green:#22c55e;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+    --disp:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
   body{background:var(--void);color:var(--ink);font-family:var(--disp);
-    -webkit-font-smoothing:antialiased;line-height:1.45;
-    background-image:radial-gradient(circle at 18% -10%,rgba(94,234,212,.06),transparent 45%),
-                     radial-gradient(circle at 90% 0%,rgba(251,191,36,.04),transparent 40%);
-    background-attachment:fixed}
+    -webkit-font-smoothing:antialiased;line-height:1.45}
   .wrap{max-width:1200px;margin:0 auto;padding:0 22px}
 
   header{position:sticky;top:0;z-index:30;
-    background:linear-gradient(180deg,var(--void) 62%,rgba(10,14,22,.85) 100%);
+    background:rgba(11,13,16,.92);
     backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
   .head{display:flex;align-items:center;justify-content:space-between;gap:18px;
     flex-wrap:wrap;padding:16px 0 15px}
   .brand{display:flex;align-items:center;gap:13px}
-  .glyph{width:30px;height:30px;border:1.5px solid var(--phosphor);border-radius:7px;
+  .glyph{width:30px;height:30px;border:1px solid var(--line2);background:var(--slate);border-radius:7px;
     display:grid;place-items:center;position:relative;flex:none}
-  .glyph::before{content:"";width:11px;height:11px;border:1.5px solid var(--phosphor);
-    border-radius:50%;opacity:.55}
-  .glyph::after{content:"";position:absolute;width:5px;height:5px;border-radius:50%;
-    background:var(--phosphor);box-shadow:0 0 9px var(--phosphor)}
+  .glyph::before{content:"";width:12px;height:8px;border-left:2px solid var(--phosphor);border-bottom:2px solid var(--phosphor)}
+  .glyph::after{content:"";position:absolute;width:11px;height:1px;background:var(--phosphor);transform:rotate(-32deg)}
   .brand h1{font-size:17px;font-weight:600;letter-spacing:-.015em}
   .brand .sub{font-family:var(--mono);font-size:10px;color:var(--faint);
     letter-spacing:.14em;text-transform:uppercase;margin-top:1px}
@@ -43,9 +35,8 @@
   .live-tag{display:flex;align-items:center;gap:7px;color:var(--mute);
     padding:6px 11px;border:1px solid var(--line);border-radius:20px;background:var(--slate2)}
   .dot{width:7px;height:7px;border-radius:50%;background:var(--faint);flex:none}
-  .dot.on{background:var(--green);box-shadow:0 0 10px var(--green);animation:beat 1.8s infinite}
-  .dot.off{background:var(--coral);box-shadow:0 0 10px var(--coral)}
-  @keyframes beat{50%{opacity:.35}}
+  .dot.on{background:var(--green)}
+  .dot.off{background:var(--coral)}
   .btn{font-family:var(--mono);font-size:11px;color:var(--ink);background:var(--slate);
     border:1px solid var(--line2);border-radius:8px;padding:7px 13px;cursor:pointer;
     transition:.15s;letter-spacing:.02em}
@@ -54,10 +45,10 @@
   .btn:disabled{opacity:.4;cursor:default}
   .btn.on{border-color:var(--phosphor);color:var(--phosphor);background:rgba(94,234,212,.08)}
 
-  .hero{padding:30px 0 8px}
+  .hero{padding:30px 0 4px}
   .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
     color:var(--faint);margin-bottom:14px}
-  .thesis{font-size:clamp(26px,4.4vw,42px);font-weight:600;letter-spacing:-.025em;line-height:1.08;max-width:21ch}
+  .thesis{font-size:clamp(24px,3.4vw,34px);font-weight:600;letter-spacing:-.025em;line-height:1.15;max-width:25ch}
   .thesis .em{color:var(--phosphor)}
   .thesis .strike{color:var(--coral);text-decoration:line-through;text-decoration-thickness:2px;
     text-decoration-color:rgba(251,111,112,.55)}
@@ -68,7 +59,7 @@
     background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
   .gauge{background:var(--slate2);padding:16px 18px;position:relative}
   .gauge .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
-  .gauge .v{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-.02em;margin-top:8px;line-height:1}
+  .gauge .v{font-family:var(--mono);font-size:24px;font-weight:600;letter-spacing:-.02em;margin-top:8px;line-height:1}
   .gauge .u{font-size:13px;color:var(--mute);font-weight:400}
   .gauge.accent .v{color:var(--green)}
   .gauge.danger .v{color:var(--coral)}
@@ -78,6 +69,9 @@
   .frame-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
     padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
   .frame-head h2{font-size:13px;font-weight:600;letter-spacing:.02em}
+  .frame-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .filter{font-family:var(--mono);font-size:10px;color:var(--mute);border:1px solid var(--line);background:transparent;border-radius:7px;padding:6px 9px;cursor:pointer}
+  .filter.active{color:var(--ink);border-color:var(--line2);background:var(--slate)}
   .legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--mute)}
   .legend span{display:flex;align-items:center;gap:7px}
   .seg{width:18px;height:5px;border-radius:3px;display:inline-block}
@@ -93,7 +87,7 @@
   .row:last-child{border-bottom:none}
   .row:hover{background:rgba(94,234,212,.025)}
   .row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:transparent}
-  .row.go::before{background:var(--green);box-shadow:0 0 12px var(--green)}
+  .row.go::before{background:var(--green)}
   .row.no::before{background:var(--coral)}
   .row.warn::before{background:var(--gold)}
   .mkt{min-width:0}
@@ -106,14 +100,14 @@
   .integ{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
   .meter{display:flex;gap:3px}
   .meter i{width:26px;height:6px;border-radius:3px;background:var(--line2);position:relative;overflow:hidden}
-  .meter i.ok{background:var(--green);box-shadow:0 0 7px rgba(52,211,153,.5)}
+  .meter i.ok{background:var(--green)}
   .meter i.bad{background:var(--coral)}
   .meter i.warn{background:var(--gold)}
   .vlabel{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.04em}
   .vlabel.go{color:var(--green)} .vlabel.no{color:var(--coral)} .vlabel.warn{color:var(--gold)}
   .vlabel .why{color:var(--faint);font-weight:400;letter-spacing:0}
 
-  .empty{padding:64px 22px;text-align:center;color:var(--mute);font-family:var(--mono);font-size:13px;line-height:1.7}
+  .empty{padding:44px 22px;text-align:center;color:var(--mute);font-size:13px;line-height:1.7}
   .empty.err{color:var(--coral)}
   .empty code{background:var(--slate);padding:2px 7px;border-radius:5px;color:var(--gold);font-size:12px}
   .spin{width:15px;height:15px;border:2px solid var(--line2);border-top-color:var(--phosphor);
@@ -153,39 +147,40 @@
       <div class="glyph" aria-hidden="true"></div>
       <div>
         <h1>Kalshi Signal Desk</h1>
-        <div class="sub">read-only &middot; live order books</div>
+        <div class="sub"><a href="../index.html" style="color:inherit;text-decoration:none">quant desk</a> &middot; scheduled public snapshot</div>
       </div>
     </div>
     <div class="tools">
       <span class="live-tag"><span class="dot" id="dot"></span><span id="connTxt">idle</span></span>
       <span class="meta" id="lastSync" style="color:var(--faint)"></span>
       <button class="btn" id="refreshBtn">&#8635; Refresh</button>
-      <button class="btn" id="autoBtn">Auto &middot; off</button>
+      <button class="btn on" id="autoBtn">Auto &middot; 60s</button>
     </div>
   </div>
 </header>
 
 <div class="wrap">
   <section class="hero">
-    <div class="eyebrow">Arbitrage integrity scanner</div>
-    <h1 class="thesis">A <span class="strike">95% win rate</span> means nothing if the fill <span class="em">isn't there.</span></h1>
-    <p class="lede">This reads <b>live public Kalshi data</b> and scores every contract on the three things the headline price hides &mdash; net edge after the <b>$0.02/contract fee</b>, real order-book <b>depth</b>, and quote <b>freshness</b>. It places no trades and holds no keys. Most rows will flag red. That's not a bug &mdash; that's the market being efficient, shown honestly.</p>
+    <div class="eyebrow">Market quality</div>
+    <h1 class="thesis">Integrity checks for executable prediction-market liquidity.</h1>
+    <p class="lede">Public Kalshi books are evaluated for fee-adjusted price gaps, available depth, and snapshot freshness. The scanner is read-only and does not submit orders.</p>
   </section>
 
   <section class="cluster" aria-label="Scan summary">
     <div class="gauge"><div class="k">Markets scanned</div><div class="v" id="sScanned">&mdash;</div></div>
     <div class="gauge accent"><div class="k">Clean signals</div><div class="v" id="sClean">&mdash;</div></div>
-    <div class="gauge danger"><div class="k">Flagged as fake</div><div class="v" id="sFlag">&mdash;</div></div>
-    <div class="gauge"><div class="k">Median quote age</div><div class="v" id="sAge">&mdash;</div></div>
+      <div class="gauge danger"><div class="k">Flagged markets</div><div class="v" id="sFlag">&mdash;</div></div>
+      <div class="gauge"><div class="k">Snapshot age</div><div class="v" id="sAge">&mdash;</div></div>
   </section>
 
   <section class="frame">
     <div class="frame-head">
-      <h2>Live signal book</h2>
-      <div class="legend">
-        <span><i class="seg" style="background:var(--green)"></i> clean</span>
-        <span><i class="seg" style="background:var(--gold)"></i> marginal</span>
-        <span><i class="seg" style="background:var(--coral)"></i> flagged</span>
+      <h2>Signal book</h2>
+      <div class="frame-controls" aria-label="Filter markets by integrity status">
+        <button class="filter active" data-filter="all">All</button>
+        <button class="filter" data-filter="go">Clean</button>
+        <button class="filter" data-filter="warn">Marginal</button>
+        <button class="filter" data-filter="no">Flagged</button>
       </div>
     </div>
     <div class="thead">
@@ -204,21 +199,21 @@
   <section class="notes">
     <div class="note">
       <h3>How net edge is read</h3>
-      <p>On a binary contract, the best YES bid and best NO bid should sum near 100&cent;. When they sum to <b>less</b>, that gap is the gross mispricing. Net edge subtracts both legs' $0.02 fee plus a slippage haircut scaled to how thin the book is. What survives is a <b>real</b> edge &mdash; usually a fraction of a cent, if anything.</p>
+      <p>For a binary contract, the best YES and NO bids should sum near 100&cent;. Net edge subtracts the configured two-leg fee and a liquidity haircut from any observed gap.</p>
     </div>
     <div class="note warn">
-      <h3>Why red is the honest default</h3>
-      <p>Liquid markets are efficient. The gap almost always dies once you price in fees and the contracts you could actually clear. A green row is rare and worth a human look &mdash; and even then, <b>you</b> place the order. No bot, no keys, no promises.</p>
+      <h3>Interpretation</h3>
+      <p>A flagged market fails at least one execution test. A clean market only passes the screen; it is not a recommendation and still requires independent review.</p>
     </div>
   </section>
 
-  <div class="foot">SOURCE &middot; KALSHI PUBLIC TRADE API V2 &middot; NO AUTH &middot; RESEARCH, NOT ADVICE</div>
+  <div class="foot">SOURCE &middot; KALSHI PUBLIC TRADE API V2 &middot; SNAPSHOT REFRESHED BY GITHUB ACTIONS &middot; RESEARCH ONLY</div>
 </div>
 
 <script>
-const API = "https://external-api.kalshi.com/trade-api/v2";
-const FEE_CENTS = 2, STALE_MS = 90000, MIN_DEPTH = 20, SCAN_LIMIT = 60;
-let auto = null;
+const SNAPSHOT_URL = "../data/kalshi_snapshot.json";
+const FEE_CENTS = 2, STALE_MS = 45*60*1000, MIN_DEPTH = 20;
+let auto = null, currentSignals = [], activeFilter = "all";
 const $ = id => document.getElementById(id);
 
 function setConn(state, txt){
@@ -226,7 +221,8 @@ function setConn(state, txt){
   $("connTxt").textContent = txt;
 }
 async function getJSON(url){
-  const r = await fetch(url,{headers:{Accept:"application/json"}});
+  const separator=url.includes("?")?"&":"?";
+  const r = await fetch(url+separator+"v="+Date.now(),{headers:{Accept:"application/json"},cache:"no-store"});
   if(!r.ok) throw new Error("HTTP "+r.status); return r.json();
 }
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -255,18 +251,25 @@ function meter(s){
 }
 
 function render(signals){
+  currentSignals=[...signals];
+  renderRows();
+}
+function renderRows(){
+  const signals=currentSignals.filter(s=>activeFilter==="all"||s.verdict===activeFilter);
   const rows=$("rows");
-  if(!signals.length){rows.innerHTML='<div class="empty">No markets returned book data this scan.</div>';return;}
+  if(!signals.length){rows.innerHTML='<div class="empty">No markets match this integrity filter.</div>';return;}
   const order={go:0,warn:1,no:2};
   signals.sort((a,b)=>order[a.verdict]-order[b.verdict]||b.netEdge-a.netEdge);
-  const clean=signals.filter(s=>s.verdict==="go").length;
-  const flag=signals.filter(s=>s.verdict==="no").length;
-  const ages=signals.map(s=>s.ageMs).sort((a,b)=>a-b);
-  const med=ages.length?Math.round(ages[Math.floor(ages.length/2)]/1000):0;
-  $("sScanned").textContent=signals.length;
+  const clean=currentSignals.filter(s=>s.verdict==="go").length;
+  const flag=currentSignals.filter(s=>s.verdict==="no").length;
+  const ages=currentSignals.map(s=>s.ageMs).sort((a,b)=>a-b);
+  const medMs=ages.length?ages[Math.floor(ages.length/2)]:0;
+  const ageValue=medMs<60000?Math.round(medMs/1000):Math.round(medMs/60000);
+  const ageUnit=medMs<60000?"s":"m";
+  $("sScanned").textContent=currentSignals.length;
   $("sClean").textContent=clean;
   $("sFlag").textContent=flag;
-  $("sAge").innerHTML=med+'<span class="u">s</span>';
+  $("sAge").innerHTML=ageValue+'<span class="u">'+ageUnit+'</span>';
   rows.innerHTML=signals.map(function(s){
     const vTxt=s.verdict==="go"?"CLEAN":s.verdict==="warn"?"MARGINAL":"FLAGGED";
     const why=s.reasons.length?' <span class="why">\u00b7 '+esc(s.reasons.join(" \u00b7 "))+'</span>':"";
@@ -281,41 +284,40 @@ function render(signals){
   }).join("");
 }
 
+document.querySelectorAll(".filter").forEach(btn=>btn.addEventListener("click",()=>{
+  activeFilter=btn.dataset.filter;
+  document.querySelectorAll(".filter").forEach(b=>b.classList.toggle("active",b===btn));
+  renderRows();
+}));
+
 async function scan(){
   $("refreshBtn").disabled=true;
-  setConn("","scanning");
-  $("rows").innerHTML='<div class="empty"><span class="spin"></span>Pulling live order books&hellip;</div>';
+  setConn("","updating");
+  $("rows").innerHTML='<div class="empty"><span class="spin"></span>Loading market snapshot&hellip;</div>';
   try{
-    const mk=await getJSON(API+"/markets?limit="+SCAN_LIMIT+"&status=open");
-    const markets=(mk.markets||[]).filter(function(m){return m.ticker;});
-    if(!markets.length){setConn("err","no markets");$("rows").innerHTML='<div class="empty">No open markets right now.</div>';return;}
-    const signals=[];
-    for(const m of markets){
-      try{
-        const ob=await getJSON(API+"/markets/"+m.ticker+"/orderbook");
-        const s=scoreMarket(m, ob.orderbook||ob, Date.now());
-        if(s) signals.push(s);
-      }catch(e){}
-      await new Promise(function(r){setTimeout(r,40);});
-    }
+    const snapshot=await getJSON(SNAPSHOT_URL);
+    const markets=(snapshot.markets||[]).filter(function(m){return m.ticker&&m.orderbook;});
+    if(!markets.length) throw new Error("snapshot contains no two-sided markets");
+    const generated=Number(snapshot.generated_at_ms)||Date.parse(snapshot.generated_at)||Date.now();
+    const signals=markets.map(function(m){return scoreMarket(m,m.orderbook,generated);}).filter(Boolean);
     render(signals);
-    setConn("live","live");
-    $("lastSync").textContent=new Date().toLocaleTimeString();
+    const ageMs=Math.max(0,Date.now()-generated);
+    const ageMin=Math.floor(ageMs/60000);
+    setConn(ageMs<=STALE_MS?"live":"err",ageMs<=STALE_MS?"snapshot":"stale snapshot");
+    $("lastSync").textContent=ageMin<1?"updated now":"updated "+ageMin+"m ago";
   }catch(e){
     setConn("err","offline");
-    const cors=(e.message==="Failed to fetch"||e.name==="TypeError");
-    $("rows").innerHTML='<div class="empty err">Couldn\'t reach Kalshi from the browser.<br><br>'+
-      (cors?'Kalshi\'s CORS policy likely blocks direct browser reads (<code>'+esc(e.message)+'</code>).<br>Run it behind a small local proxy, or fetch server-side and point this at your own endpoint.'
-        :'<code>'+esc(e.message)+'</code>')+'</div>';
+    $("rows").innerHTML='<div class="empty err">Market snapshot is temporarily unavailable.<br><code>'+esc(e.message)+'</code></div>';
   }finally{ $("refreshBtn").disabled=false; }
 }
 
 $("refreshBtn").onclick=scan;
 $("autoBtn").onclick=function(){
   if(auto){clearInterval(auto);auto=null;this.textContent="Auto \u00b7 off";this.classList.remove("on");}
-  else{scan();auto=setInterval(scan,30000);this.textContent="Auto \u00b7 30s";this.classList.add("on");}
+  else{scan();auto=setInterval(scan,60000);this.textContent="Auto \u00b7 60s";this.classList.add("on");}
 };
 scan();
+auto=setInterval(scan,60000);
 </script>
 </body>
 </html>
