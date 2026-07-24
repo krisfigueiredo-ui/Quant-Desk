@@ -47,3 +47,27 @@ def test_unknown_order_state_never_allows_resubmission() -> None:
     assert result.result.state == BrokerOrderState.UNKNOWN
     assert result.resubmission_allowed is False
     assert result.result.accepted_quantity == Decimal("0")
+
+
+class PartialFillAdapter(BrokenAdapter):
+    adapter_id = "partial-fill-fixture"
+
+    def get_order(self, broker_order_id: str) -> BrokerOrderResult:
+        return BrokerOrderResult(
+            adapter_id=self.adapter_id,
+            client_order_id="fixture-client-order",
+            broker_order_id=broker_order_id,
+            state=BrokerOrderState.PARTIALLY_FILLED,
+            accepted_quantity=Decimal("10"),
+            filled_quantity=Decimal("4"),
+            average_fill_price=Decimal("100.25"),
+            reason_code="PARTIAL_FILL",
+        )
+
+
+def test_partial_fill_preserves_quantity_and_blocks_resubmission() -> None:
+    reconciled = reconcile_order(PartialFillAdapter(), "partial-order")
+    assert reconciled.result.state == BrokerOrderState.PARTIALLY_FILLED
+    assert reconciled.result.filled_quantity == Decimal("4")
+    assert reconciled.result.accepted_quantity == Decimal("10")
+    assert reconciled.resubmission_allowed is False
