@@ -24,7 +24,7 @@ h1{font-size:21px;letter-spacing:-.35px;margin-bottom:2px;font-weight:650}
 .intro p{font-size:13px;color:var(--muted);line-height:1.65}
 .note{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:11px 14px;margin:0 0 18px;background:var(--card)}
 .note b{color:var(--green)}
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 a.card{display:flex;min-height:190px;flex-direction:column;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;text-decoration:none;color:var(--text);transition:border-color .15s,background .15s,transform .15s}
 a.card:hover{border-color:#3a4656;background:var(--raised);transform:translateY(-1px)}
 a.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -56,6 +56,10 @@ footer a{color:var(--accent)}
 </section>
 <div class="note"><b>Paper trading only.</b> The hosted account monitor uses representative demo data. Live paper-account data is available through the repository&rsquo;s local read-only proxy, which keeps credentials off the page.</div>
 <div class="cards">
+  <a class="card" href="dashboard/">
+    <div><div class="topline">Multi-agent operations</div><h3>Quant operations console</h3><p>Monitor agents, decision traces, risk limits, strategy state, orders, and integrations. Local API required for data.</p></div>
+    <div class="open">Open console &rarr;</div>
+  </a>
   <a class="card" href="dashboards/bot_dashboard.html">
     <div><div class="topline">Portfolio operations</div><h3>Paper account monitor</h3><p>Review equity, open positions, risk levels, and recent orders. Hosted demo included; local mode connects securely to Alpaca paper.</p></div>
     <div class="open">Open monitor &rarr;</div>

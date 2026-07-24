@@ -55,6 +55,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     dashboard_dir = project_root / "dashboard"
     if dashboard_dir.exists():
         app.mount("/ops", StaticFiles(directory=dashboard_dir, html=True), name="ops")
+    reports_dir = project_root / "reports"
+    if reports_dir.exists():
+        app.mount("/reports", StaticFiles(directory=reports_dir), name="reports")
 
     @app.get("/", include_in_schema=False)
     def root() -> RedirectResponse:

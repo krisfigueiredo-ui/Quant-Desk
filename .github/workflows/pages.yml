@@ -36,10 +36,12 @@ jobs:
           enablement: true
       - name: Stage static site (landing page + read-only dashboards)
         run: |
-          mkdir -p _site/dashboards _site/data
+          mkdir -p _site/dashboards _site/dashboard _site/data _site/reports
           cp index.html _site/
           cp dashboards/*.html _site/dashboards/
+          cp dashboard/* _site/dashboard/
           cp data/kalshi_snapshot.json _site/data/
+          cp reports/sample-agent-communication.* _site/reports/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

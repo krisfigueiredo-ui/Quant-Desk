@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Quant Desk paper and shadow trading operations console">
+  <title>Quant Desk · Operations Console</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to operations workspace</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <a class="brand" href="#overview" aria-label="Quant Desk overview">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 17.5 9 12l3 3 7-8M15 7h4v4"/></svg>
+        </span>
+        <span><b>Quant Desk</b><small>Operations</small></span>
+      </a>
+      <nav id="primary-nav">
+        <a href="#overview" data-page="overview"><span>01</span>Executive overview</a>
+        <a href="#agents" data-page="agents"><span>02</span>Agent operations</a>
+        <a href="#day-desk" data-page="day-desk"><span>03</span>Day-trading desk</a>
+        <a href="#long-term" data-page="long-term"><span>04</span>Long-term desk</a>
+        <a href="#scanner" data-page="scanner"><span>05</span>Market scanner</a>
+        <a href="#strategies" data-page="strategies"><span>06</span>Strategy lab</a>
+        <a href="#risk" data-page="risk"><span>07</span>Risk command center</a>
+        <a href="#orders" data-page="orders"><span>08</span>Orders &amp; executions</a>
+        <a href="#audit" data-page="audit"><span>09</span>Communication &amp; audit</a>
+        <a href="#settings" data-page="settings"><span>10</span>Settings &amp; integrations</a>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="mini-status"><i class="dot dot-amber"></i><span>Restricted live<br><b>Not authorized</b></span></div>
+        <button id="theme-toggle" class="icon-button" type="button" aria-label="Toggle color theme">◐</button>
+      </div>
+    </aside>
+
+    <div class="content-shell">
+      <header class="topbar">
+        <button id="nav-toggle" class="icon-button mobile-only" type="button" aria-label="Open navigation">☰</button>
+        <div class="environment">
+          <strong id="environment-mode">PAPER</strong>
+          <span id="data-mode">Connecting…</span>
+        </div>
+        <div class="topbar-right">
+          <div class="connection" id="connection-state"><i class="dot dot-amber"></i><span>API connecting</span></div>
+          <time id="utc-clock">--:--:-- UTC</time>
+          <button id="refresh-button" class="icon-button" type="button" aria-label="Refresh operations data">↻</button>
+        </div>
+      </header>
+
+      <div class="safety-banner" role="status">
+        <div><b>PAPER ENVIRONMENT</b><span>No live execution authorization. Synthetic fixtures are labeled throughout.</span></div>
+        <div class="banner-flags"><span>Equities live: OFF</span><span>Crypto live: OFF</span><span>Autonomy: OFF</span></div>
+      </div>
+
+      <main id="workspace" tabindex="-1">
+        <div id="page-heading" class="page-heading skeleton-heading" aria-live="polite"></div>
+        <div id="page-content" class="page-content" aria-live="polite">
+          <div class="loading-grid" aria-label="Loading dashboard">
+            <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+            <div class="skeleton wide"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <dialog id="control-dialog">
+    <form method="dialog" id="control-form">
+      <div class="dialog-kicker">Authenticated deterministic control</div>
+      <h2 id="control-title">Confirm control</h2>
+      <p id="control-description" class="muted"></p>
+      <label>Operator token<input id="control-token" type="password" autocomplete="off" required></label>
+      <label>Exact confirmation phrase<input id="control-phrase" type="text" autocomplete="off" required></label>
+      <label>Operational reason<textarea id="control-reason" minlength="3" maxlength="500" required></textarea></label>
+      <div id="control-feedback" class="form-feedback" role="status"></div>
+      <div class="dialog-actions">
+        <button class="button secondary" value="cancel" type="button" id="control-cancel">Cancel</button>
+        <button class="button danger" type="submit">Submit control</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
