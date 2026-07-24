@@ -1,0 +1,12 @@
+schema_version: 1.0.0
+venue: robinhood-crypto-v2
+spot_only: true
+automatic_additions: false
+allowlist: [BTC-USD, ETH-USD]
+disabled_categories: [leverage, derivatives, lending, staking, newly_listed]
+filters:
+  maximum_spread_bps: 60
+  minimum_history_days: 365
+  require_api_tradable: true
+  require_precision_discovery: true
+  require_minimum_order_discovery: true

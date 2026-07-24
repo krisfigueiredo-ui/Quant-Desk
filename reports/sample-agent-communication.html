@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quant Desk Agent Communication Report</title>
+<style>
+:root{--bg:#0b0d10;--card:#12161b;--raised:#171c22;--line:#252c36;
+--text:#e7eaf0;--muted:#8b949e;--blue:#60a5fa;--green:#22c55e;
+--red:#ef4444;--amber:#f59e0b;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);
+font:14px/1.5 Inter,system-ui,sans-serif}main{max-width:1180px;margin:auto;padding:32px 22px 64px}
+header{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;
+border-bottom:1px solid var(--line);padding-bottom:22px}h1{font-size:24px;margin:0 0 6px}
+h2{font-size:15px;margin:30px 0 12px}h3{font:12px var(--mono);color:var(--muted)}
+.muted{color:var(--muted)}.banner{margin:18px 0;padding:12px 14px;border:1px solid var(--amber);
+background:rgba(245,158,11,.08);border-radius:10px;color:#fbbf24;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.card{background:var(--card);
+border:1px solid var(--line);border-radius:12px;padding:17px}.metric{font:24px var(--mono)}
+.label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line)}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted);
+font-size:11px}.kv th{width:36%}.kv td{font-family:var(--mono);font-size:12px;word-break:break-word}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:16px}.trace{list-style:none;padding:0;margin:0;
+border:1px solid var(--line);border-radius:12px;overflow:hidden}.trace-item{display:grid;
+grid-template-columns:180px 1fr auto;gap:12px;padding:12px 14px;background:var(--card);
+border-bottom:1px solid var(--line)}.trace-item:last-child{border-bottom:0}
+.trace-item p{grid-column:2/-1;margin:0;color:var(--muted)}.trace-type{font-family:var(--mono);
+color:var(--blue)}.status{font:10px var(--mono);padding:3px 7px;border-radius:5px}
+.accepted{color:var(--green);background:rgba(34,197,94,.1)}.rejected{color:var(--red);
+background:rgba(239,68,68,.1)}footer{margin-top:34px;border-top:1px solid var(--line);
+padding-top:18px;color:var(--muted);font-size:11px}@media(max-width:760px){.grid,.split{grid-template-columns:1fr}
+.trace-item{grid-template-columns:1fr auto}.trace-type{grid-column:1/-1}}
+@media print{:root{--bg:#fff;--card:#fff;--line:#ddd;--text:#111;--muted:#555}
+main{padding:0}.banner{border-color:#999;color:#111}}
+</style>
+</head>
+<body><main>
+<header><div><div class="label">Quant Desk / Communication Audit</div>
+<h1>Quant Desk Agent Communication Report</h1>
+<div class="muted">2026-07-24T22:20:31.716601+00:00 · UTC</div></div>
+<div class="label">Mode<br><span class="metric">PAPER</span></div></header>
+<div class="banner">SYNTHETIC FIXTURE — This report is not real trading activity.</div>
+<section class="grid">
+<div class="card"><div class="label">Messages</div><div class="metric">8</div></div>
+<div class="card"><div class="label">Risk rejections</div><div class="metric">1</div></div>
+<div class="card"><div class="label">Trades prevented</div><div class="metric">1</div></div>
+</section>
+<h2>Executive summary</h2><div class="card"><p>The synthetic decision trace was stopped before execution because the proposed entry would breach the cash-reserve limit.</p>
+<p class="muted">This sample contains synthetic validation data and does not represent real trading activity.</p></div>
+<h2>Agent health</h2><table><thead><tr><th>Agent</th><th>Health</th><th>Average latency</th>
+<th>Messages</th></tr></thead><tbody><tr><td>Equity Market Scanner</td><td>HEALTHY</td><td>18 ms</td><td>20</td></tr><tr><td>Crypto Market Scanner</td><td>HEALTHY</td><td>21 ms</td><td>21</td></tr><tr><td>Technical Analyst</td><td>HEALTHY</td><td>24 ms</td><td>22</td></tr><tr><td>Fundamental and Quality Analyst</td><td>IDLE</td><td>27 ms</td><td>23</td></tr><tr><td>News and Event-Risk Analyst</td><td>HEALTHY</td><td>30 ms</td><td>24</td></tr><tr><td>Day-Trading Strategy Agent</td><td>HEALTHY</td><td>33 ms</td><td>25</td></tr><tr><td>Long-Term Investment Agent</td><td>HEALTHY</td><td>36 ms</td><td>26</td></tr><tr><td>Strategy Allocator</td><td>IDLE</td><td>39 ms</td><td>27</td></tr><tr><td>Portfolio Manager</td><td>HEALTHY</td><td>42 ms</td><td>28</td></tr><tr><td>Deterministic Risk Engine</td><td>HEALTHY</td><td>45 ms</td><td>29</td></tr><tr><td>Execution Agent</td><td>HEALTHY</td><td>48 ms</td><td>30</td></tr><tr><td>Position and Exit Monitor</td><td>IDLE</td><td>51 ms</td><td>31</td></tr><tr><td>Auditor and Communication Reporter</td><td>HEALTHY</td><td>54 ms</td><td>32</td></tr></tbody></table>
+<h2>Message distribution</h2><div class="split"><div><table class="kv"><tbody><tr><th>Auditor-Communication-Reporter</th><td>1</td></tr><tr><th>Day-Trading-Strategy-Agent</th><td>1</td></tr><tr><th>Deterministic-Risk-Engine</th><td>1</td></tr><tr><th>Equity-Market-Scanner</th><td>1</td></tr><tr><th>Market-Data-Gateway</th><td>1</td></tr><tr><th>News-Event-Risk-Analyst</th><td>1</td></tr><tr><th>Portfolio-Manager</th><td>1</td></tr><tr><th>Technical-Analyst</th><td>1</td></tr></tbody></table></div><div><table class="kv"><tbody><tr><th>Auditevent</th><td>1</td></tr><tr><th>Eventriskassessment</th><td>1</td></tr><tr><th>Marketobservation</th><td>1</td></tr><tr><th>Portfoliodecision</th><td>1</td></tr><tr><th>Riskdecision</th><td>1</td></tr><tr><th>Scannercandidate</th><td>1</td></tr><tr><th>Technicalassessment</th><td>1</td></tr><tr><th>Tradeintent</th><td>1</td></tr></tbody></table></div></div>
+<h2>Full decision traces</h2><h3>Trace 2fd0b9ed-16f2-4165-bf8f-64b86d16beaf</h3><ol class="trace"><li class="trace-item"><span class="trace-type">MarketObservation</span><span>market-data-gateway</span><span class="status accepted">ACCEPTED</span><p>Fresh paper quote</p></li><li class="trace-item"><span class="trace-type">ScannerCandidate</span><span>equity-market-scanner</span><span class="status accepted">ACCEPTED</span><p>Ranked candidate</p></li><li class="trace-item"><span class="trace-type">TechnicalAssessment</span><span>technical-analyst</span><span class="status accepted">ACCEPTED</span><p>Multi-factor confirmation</p></li><li class="trace-item"><span class="trace-type">EventRiskAssessment</span><span>news-event-risk-analyst</span><span class="status accepted">ACCEPTED</span><p>No event block</p></li><li class="trace-item"><span class="trace-type">TradeIntent</span><span>day-trading-strategy-agent</span><span class="status accepted">ACCEPTED</span><p>Limit intent</p></li><li class="trace-item"><span class="trace-type">PortfolioDecision</span><span>portfolio-manager</span><span class="status rejected">REJECTED</span><p>Cash reserve would be breached</p></li><li class="trace-item"><span class="trace-type">RiskDecision</span><span>deterministic-risk-engine</span><span class="status rejected">REJECTED</span><p>CASH_RESERVE_LIMIT</p></li><li class="trace-item"><span class="trace-type">AuditEvent</span><span>auditor-communication-reporter</span><span class="status accepted">ACCEPTED</span><p>Safeguard recorded</p></li></ol>
+<h2>Agreement and conflict resolution</h2><div class="split">
+<div class="card"><div class="label">Agreement</div><p>Scanner and technical analyst agreed the fixture was technically qualified.</p></div>
+<div class="card"><div class="label">Disagreement</div><p>Strategy intent requested exposure; portfolio/risk rejected the exposure.</p></div></div>
+<h2>Risk, execution, and fills</h2><table class="kv"><tbody><tr><th>Risk Approvals</th><td>0</td></tr><tr><th>Risk Rejections</th><td>1</td></tr><tr><th>Execution Requests</th><td>0</td></tr><tr><th>Broker Responses</th><td>0</td></tr><tr><th>Fills</th><td>0</td></tr><tr><th>Permission Violations</th><td>0</td></tr></tbody></table>
+<h2>Performance and safeguards</h2><table class="kv"><tbody><tr><th>Strategy Performance</th><td>{&quot;status&quot;: &quot;NOT_AVAILABLE&quot;, &quot;reason&quot;: &quot;Synthetic communication sample contains no realized strategy returns.&quot;}</td></tr><tr><th>Benchmark Comparison</th><td>{&quot;status&quot;: &quot;NOT_AVAILABLE&quot;, &quot;reason&quot;: &quot;No real or backtest performance is represented by this report.&quot;}</td></tr><tr><th>Plateau And Decay Signals</th><td>[]</td></tr><tr><th>Drawdown Status</th><td>{&quot;current&quot;: -0.012, &quot;stage&quot;: &quot;NORMAL&quot;}</td></tr><tr><th>Open Incidents</th><td>[]</td></tr></tbody></table>
+<h2>Recommended operational actions</h2><div class="card"><ol>
+<li>Keep PAPER mode active.</li><li>Review the rejected cash-reserve scenario.</li><li>Complete broker capability discovery only with operator participation.</li>
+</ol></div>
+<footer>Redacted append-only communication report · JSON and CSV companions available ·
+No model chain-of-thought is included.</footer>
+</main></body></html>

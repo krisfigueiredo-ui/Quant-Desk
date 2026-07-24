@@ -1,78 +1,132 @@
 # Quant Desk
 
-Quant Desk is a paper-trading research workspace for equity and crypto factor strategies, scheduled Alpaca paper execution, position-risk monitoring, and prediction-market liquidity analysis.
+Quant Desk is a fail-closed multi-agent quantitative research and trading
+operations workspace for US equities and spot cryptocurrency. It combines typed
+agent communication, deterministic portfolio/risk controls, paper and shadow
+execution, official-adapter boundaries, audit reporting, and an institutional
+operations console.
 
-**Live dashboard:** https://krisfigueiredo-ui.github.io/Quant-Desk/
+> Development is PAPER only. Live equities, live crypto, and autonomous
+> execution are disabled. No strategy performance or benchmark outperformance
+> is guaranteed, and this software is not investment advice.
 
-> Research and paper trading only. The project has no live-money configuration and does not provide investment advice.
+**Static dashboard:** https://krisfigueiredo-ui.github.io/Quant-Desk/
+
+## Safety defaults
+
+```dotenv
+TRADING_MODE=PAPER
+LIVE_EQUITIES_ENABLED=false
+LIVE_CRYPTO_ENABLED=false
+AUTONOMOUS_EXECUTION_ENABLED=false
+```
+
+The code recognizes BACKTEST, PAPER, SHADOW, RESTRICTED_LIVE, STANDARD_LIVE,
+PAUSED, CAPITAL_PRESERVATION, and KILLED. `STANDARD_LIVE` cannot be activated
+from environment configuration. Restricted live requires separate offline
+asset-specific readiness records and exact phrases; no API or dashboard route
+can activate it.
+
+## Architecture
+
+The 13 typed agents cover equity and crypto scanning, technical, fundamental,
+and event analysis, day and long-term strategies, strategy allocation,
+portfolio management, deterministic risk, narrow execution, position/exit
+monitoring, and append-only audit reporting.
+
+Only the Execution Agent can request a broker action. It receives an immutable
+proposed order, a fresh Risk Engine approval, a mode authorization, an
+idempotency key, and a verified adapter. It cannot select a symbol, increase
+quantity, reverse side, widen tolerance, or bypass a rejection.
+
+See:
+
+- [Architecture](docs/architecture.md)
+- [Agent communication](docs/agent-communication.md)
+- [Permissions matrix](docs/agent-permissions-matrix.md)
+- [Risk controls](docs/risk-controls.md)
+- [Operations runbook](docs/operations-runbook.md)
+- [Live readiness](docs/live-readiness.md)
 
 ## Repository map
 
 | Path | Purpose |
 |---|---|
-| `bots/auto_paper_trader.py` | Equity factor strategy with monthly rebalancing |
-| `bots/auto_paper_trader_crypto.py` | Crypto momentum and trend strategy with weekly rebalancing |
-| `bots/exit_manager.py` | Daily stop-loss and take-profit checks |
-| `dashboards/bot_dashboard.html` | Read-only paper-account monitor with a hosted demo mode |
-| `dashboards/kalshi_signals.html` | Fee, depth, and freshness checks over public Kalshi quotes |
-| `scripts/local_dashboard_server.py` | Local static server and read-only Alpaca proxy |
-| `scripts/fetch_kalshi_snapshot.py` | Server-side public market snapshot generator |
-| `notebooks/impact_quant_strategy.ipynb` | Factor research, backtests, cost analysis, Monte Carlo, and ML experiments |
-| `.github/workflows/paper_bots.yml` | Scheduled dry-run paper bots |
-| `.github/workflows/pages.yml` | Dashboard deployment and 15-minute public snapshot refresh |
+| `src/quant_trade_desk` | Typed agents, communication, risk, portfolio, execution, storage, API, reporting |
+| `apps/api`, `apps/worker` | Runtime entry points |
+| `dashboard` | Ten-view operations console |
+| `config` | Conservative versioned configuration examples |
+| `migrations` | Alembic schema migration |
+| `pine` | TradingView research-input alerts |
+| `reports` | Clearly labeled synthetic communication report |
+| `tests` | Unit, integration, contract, security, dashboard, and failure-injection tests |
+| `bots` | Retained legacy Alpaca paper-only bots |
+| `dashboards` | Retained legacy read-only dashboards |
+| `notebooks` | Retained research notebooks |
 
-## Strategy setup
+## Local setup
+
+Python 3.11 or newer is required.
 
 ```bash
-python3 -m venv .venv
+python3.12 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -e ".[dev]"
 cp .env.example .env
+python scripts/verify_live_disabled.py
+pytest
+python scripts/run_api.py
 ```
 
-Add Alpaca **paper** credentials to `.env`, load them into the shell, and run a dry-run strategy:
+Open `http://127.0.0.1:8000/ops/`. The development API uses clearly labeled
+synthetic fixtures; they are not trading activity or performance.
+
+PostgreSQL and Redis for the production-shaped local stack:
 
 ```bash
-set -a
-source .env
-set +a
-python3 bots/auto_paper_trader.py
+docker compose up -d postgres redis
+QUANT_DESK_DATABASE_URL=postgresql+psycopg://quant_desk:quant_desk@localhost:5432/quant_desk \
+  alembic upgrade head
 ```
 
-`DRY_RUN=true` is the default. Intended orders are logged but not submitted.
+Do not use the example database password outside local development.
 
-## Account monitor
+## Broker boundaries
 
-The GitHub Pages version uses representative data so the dashboard is useful without asking for credentials in a public page. For live paper-account data, start the local read-only proxy:
+- Equities: a typed bridge for Robinhood’s officially documented Agentic
+  Trading MCP. It remains unauthenticated and disabled until actual tool schemas
+  and the dedicated account are verified.
+- Crypto: official Robinhood Crypto Trading API v2, Ed25519 signing, spot
+  limit/GTC only, BTC/ETH initial allowlist, verified precision/size, verified
+  total equity, and full reconciliation. It remains disabled.
+- PAPER and SHADOW never route to a live adapter.
+
+Details are in [equity execution](docs/equity-execution.md) and
+[crypto execution](docs/crypto-execution.md).
+
+## Research honesty
+
+Every new strategy remains `RESEARCH` and disabled. No new historical result is
+claimed. `scripts/run_backtest.py` requires an explicit dataset, enforces
+chronological train/validation/untouched-test splits, applies costs and stress,
+and never promotes automatically. SPY is the primary equity benchmark; BTC and
+ETH buy-and-hold are sleeve benchmarks where appropriate.
+
+The retained legacy paper bots still use `paper=True` and `DRY_RUN=true` by
+default. They are not wired into restricted-live adapters.
+
+## Validation
 
 ```bash
-set -a
-source .env
-set +a
-python3 scripts/local_dashboard_server.py --port 8000
+ruff format --check src apps tests scripts
+ruff check src apps tests scripts
+mypy src apps scripts
+pytest
+node --check dashboard/app.js
+python scripts/generate_communication_report.py --synthetic --sample
+python scripts/verify_live_disabled.py
 ```
 
-Open `http://127.0.0.1:8000/dashboards/bot_dashboard.html`. Credentials stay in the Python process. The browser only receives account, position, and recent-order responses; the proxy exposes no order-entry route.
-
-## Kalshi snapshot
-
-Browsers cannot reliably call Kalshi's API from GitHub Pages because of cross-origin restrictions. The Pages workflow therefore fetches public top-of-book data server-side every 15 minutes, normalizes current and legacy quote fields, and publishes `data/kalshi_snapshot.json`. The dashboard polls that static snapshot automatically.
-
-Generate a local snapshot with:
-
-```bash
-python3 scripts/fetch_kalshi_snapshot.py
-python3 -m http.server 8000
-```
-
-## GitHub Actions
-
-Add `ALPACA_API_KEY` and `ALPACA_SECRET_KEY` under **Settings → Secrets and variables → Actions**. Notification secrets are optional. The bot workflow remains dry-run until `DRY_RUN` is deliberately changed.
-
-## Safety controls
-
-- Every Alpaca client is configured for the paper environment.
-- Automated jobs default to dry-run.
-- `.env`, keys, logs, caches, and editor files are ignored by Git.
-- The hosted site never requests or stores account credentials.
-- Dashboard API access is read-only; no route can place, change, or cancel an order.
+GitHub Actions run tests, type and style checks, migration validation, static
+dashboard checks, secret scanning, dependency review, and Docker build. They
+never run a live broker test.

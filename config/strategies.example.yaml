@@ -1,0 +1,33 @@
+schema_version: 1.0.0
+promotion_policy:
+  required_evaluations:
+    - train_validation_untouched_test
+    - walk_forward
+    - transaction_cost_stress
+    - parameter_stability
+    - regime_stability
+    - bootstrap_or_monte_carlo
+  minimum_observations: 100
+  permit_automatic_live_promotion: false
+strategies:
+  equity-intraday-trend-pullback-v1:
+    enabled: false
+    mode: BACKTEST
+    validation_status: RESEARCH
+    benchmark: SPY
+    cost_bps: 5
+    slippage_bps: 5
+  crypto-intraday-breakout-v1:
+    enabled: false
+    mode: BACKTEST
+    validation_status: RESEARCH
+    benchmark: BTC-USD
+    cost_bps: 35
+    slippage_bps: 20
+  equity-quality-momentum-v1:
+    enabled: false
+    mode: BACKTEST
+    validation_status: RESEARCH
+    benchmark: SPY
+    cost_bps: 5
+    slippage_bps: 5

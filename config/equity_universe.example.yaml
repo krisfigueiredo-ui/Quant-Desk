@@ -1,0 +1,11 @@
+schema_version: 1.0.0
+source: S&P 500 plus manually reviewed liquid US listings
+automatic_additions: false
+allowlist: [SPY, QQQ]
+filters:
+  minimum_price_usd: 5
+  minimum_average_dollar_volume_usd: 50000000
+  maximum_spread_bps: 35
+  minimum_history_days: 252
+  require_us_listing: true
+  require_fresh_corporate_actions: true

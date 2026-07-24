@@ -1,0 +1,12 @@
+# Deterministic test fixtures and Robinhood's published signing vector.
+# Fingerprints are commit-, path-, rule-, and line-specific so future findings
+# in the same files still fail the scan.
+c8bdd2ed347e5a4318c029eedb9adce3091381e7:tests/unit/test_messages.py:generic-api-key:56
+c8bdd2ed347e5a4318c029eedb9adce3091381e7:tests/security/test_tradingview_webhook.py:generic-api-key:35
+c8bdd2ed347e5a4318c029eedb9adce3091381e7:tests/contract/test_crypto_signing.py:generic-api-key:8
+c8bdd2ed347e5a4318c029eedb9adce3091381e7:tests/contract/test_crypto_signing.py:generic-api-key:9
+c8bdd2ed347e5a4318c029eedb9adce3091381e7:tests/unit/test_execution.py:generic-api-key:62
+c8bdd2ed347e5a4318c029eedb9adce3091381e7:tests/unit/test_execution.py:generic-api-key:88
+c8bdd2ed347e5a4318c029eedb9adce3091381e7:tests/unit/test_execution.py:generic-api-key:111
+c8bdd2ed347e5a4318c029eedb9adce3091381e7:tests/unit/test_execution.py:generic-api-key:137
+c8bdd2ed347e5a4318c029eedb9adce3091381e7:.env.example:generic-api-key:46

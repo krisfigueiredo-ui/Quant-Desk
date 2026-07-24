@@ -4,48 +4,59 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quant Desk — Research Operations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0b0d10; --card:#12161b; --raised:#171c22; --line:#252c36;
-  --text:#e7eaf0; --muted:#8b949e; --accent:#60a5fa; --green:#22c55e;
+  --canvas:#f1f2ef;--surface:#fbfcfa;--surface2:#f5f6f3;--line:#d9ddd8;
+  --line2:#bac2bd;--ink:#11191f;--muted:#667178;--faint:#8b9498;
+  --navy:#10181e;--accent:#3155c6;--green:#14735a;--amber:#a5630a;
+  --sans:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5;padding:0 24px 56px;max-width:1040px;margin:0 auto;-webkit-font-smoothing:antialiased}
-header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:42px 0 28px;border-bottom:1px solid var(--line)}
+html{background:var(--canvas)}
+body{min-height:100vh;background:var(--canvas);color:var(--ink);font:14px/1.55 var(--sans);padding:0 32px 56px;max-width:1180px;margin:0 auto;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+header{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:30px 0 24px;border-bottom:1px solid var(--line2)}
 .brand{display:flex;align-items:center;gap:13px}
-.mark{width:34px;height:34px;border:1px solid #344050;border-radius:9px;background:var(--raised);display:grid;place-items:center}
-.mark svg{width:18px;height:18px;color:var(--accent)}
-h1{font-size:21px;letter-spacing:-.35px;margin-bottom:2px;font-weight:650}
-.sub{color:var(--muted);font-size:13px}
-.status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;border:1px solid var(--line);border-radius:999px;padding:7px 11px;background:var(--card);white-space:nowrap}
-.status::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green)}
-.intro{padding:30px 0 22px;display:grid;grid-template-columns:1.35fr .65fr;gap:24px;align-items:end}
-.intro h2{font-size:28px;line-height:1.22;letter-spacing:-.65px;font-weight:600;max-width:590px}
-.intro p{font-size:13px;color:var(--muted);line-height:1.65}
-.note{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:11px 14px;margin:0 0 18px;background:var(--card)}
-.note b{color:var(--green)}
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-a.card{display:flex;min-height:190px;flex-direction:column;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;text-decoration:none;color:var(--text);transition:border-color .15s,background .15s,transform .15s}
-a.card:hover{border-color:#3a4656;background:var(--raised);transform:translateY(-1px)}
+.mark{width:38px;height:38px;border:1px solid #26343c;border-radius:4px;background:var(--navy);display:grid;place-items:center;color:#93a8ef}
+.mark svg{width:21px;height:21px}
+h1{font-size:19px;letter-spacing:-.035em;margin-bottom:1px;font-weight:600}
+.sub{color:var(--muted);font:9px var(--mono);letter-spacing:.09em;text-transform:uppercase}
+.status{display:flex;align-items:center;gap:8px;color:var(--muted);font:9px var(--mono);letter-spacing:.055em;text-transform:uppercase;border:1px solid var(--line2);border-radius:4px;padding:8px 11px;background:var(--surface);white-space:nowrap}
+.status::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(20,115,90,.1)}
+.intro{padding:56px 0 38px;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(260px,.55fr);gap:72px;align-items:end}
+.intro h2{font-size:clamp(38px,5.3vw,62px);line-height:1.02;letter-spacing:-.055em;font-weight:500;max-width:800px}
+.intro p{font-size:13px;color:var(--muted);line-height:1.75;border-left:1px solid var(--line2);padding-left:20px}
+.note{font-size:11px;color:var(--muted);border:1px solid #d9c8a5;border-radius:4px;padding:11px 14px;margin:0 0 16px;background:#f7f1e5}
+.note b{color:var(--amber);font:500 9px var(--mono);letter-spacing:.05em;text-transform:uppercase}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;overflow:hidden;border:1px solid var(--line);border-radius:5px;background:var(--line)}
+a.card{position:relative;display:flex;min-height:230px;flex-direction:column;justify-content:space-between;background:var(--surface);padding:24px;text-decoration:none;color:var(--ink);transition:background .18s,color .18s}
+a.card::before{content:"";position:absolute;inset:0 auto auto 0;width:100%;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .2s ease}
+a.card:hover{background:#fff}
+a.card:hover::before{transform:scaleX(1)}
 a.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.card .topline{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.card h3{font-size:17px;margin:10px 0 6px;font-weight:600;letter-spacing:-.2px}
-.card p{font-size:13px;color:var(--muted);max-width:42ch}
-.card .open{font-size:12px;color:var(--accent);margin-top:24px}
-.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:18px}
-.meta div{background:var(--card);padding:13px 14px}
-.meta span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
-.meta b{font-size:12px;font-weight:500}
-footer{display:flex;justify-content:space-between;gap:20px;margin-top:32px;padding-top:20px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+.card .topline{font:500 9px var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.09em}
+.card h3{font-size:20px;margin:20px 0 8px;font-weight:500;letter-spacing:-.03em}
+.card p{font-size:12px;line-height:1.7;color:var(--muted);max-width:38ch}
+.card .open{font:500 9px var(--mono);letter-spacing:.055em;text-transform:uppercase;color:var(--accent);margin-top:28px}
+.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:5px;overflow:hidden;margin-top:14px}
+.meta div{background:var(--surface2);padding:15px 17px}
+.meta span{display:block;color:var(--faint);font:9px var(--mono);text-transform:uppercase;letter-spacing:.065em;margin-bottom:5px}
+.meta b{font-size:11px;font-weight:500}
+footer{display:flex;justify-content:space-between;gap:20px;margin-top:38px;padding-top:18px;border-top:1px solid var(--line);font:9px var(--mono);letter-spacing:.025em;color:var(--muted)}
 footer a{color:var(--accent)}
-@media(max-width:720px){body{padding-inline:16px}header{padding-top:28px}.intro{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.meta{grid-template-columns:1fr}footer{flex-direction:column}.status{display:none}}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@keyframes enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.intro,.note,.cards,.meta{animation:enter .4s cubic-bezier(.2,.75,.3,1) both}.cards{animation-delay:.07s}.meta{animation-delay:.12s}
+@media(max-width:760px){body{padding-inline:18px}header{padding-top:22px}.intro{padding:38px 0 28px;grid-template-columns:1fr;gap:24px}.intro h2{font-size:clamp(34px,11vw,48px)}.intro p{padding-left:14px}.cards{grid-template-columns:1fr}.meta{grid-template-columns:1fr}footer{flex-direction:column}.status{display:none}a.card{min-height:190px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <header>
   <div class="brand">
-    <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 17.5 9 12l3 3 7-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7h4v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+    <div class="mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><path d="M5 7.5h18M5 14h11M5 20.5h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="20.5" cy="14" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg></div>
     <div><h1>Quant Desk</h1><p class="sub">Systematic research operations</p></div>
   </div>
   <div class="status">Paper environment</div>
@@ -56,6 +67,10 @@ footer a{color:var(--accent)}
 </section>
 <div class="note"><b>Paper trading only.</b> The hosted account monitor uses representative demo data. Live paper-account data is available through the repository&rsquo;s local read-only proxy, which keeps credentials off the page.</div>
 <div class="cards">
+  <a class="card" href="dashboard/">
+    <div><div class="topline">Multi-agent operations</div><h3>Quant operations console</h3><p>Monitor agents, decision traces, risk limits, strategy state, orders, and integrations. Local API required for data.</p></div>
+    <div class="open">Open console &rarr;</div>
+  </a>
   <a class="card" href="dashboards/bot_dashboard.html">
     <div><div class="topline">Portfolio operations</div><h3>Paper account monitor</h3><p>Review equity, open positions, risk levels, and recent orders. Hosted demo included; local mode connects securely to Alpaca paper.</p></div>
     <div class="open">Open monitor &rarr;</div>

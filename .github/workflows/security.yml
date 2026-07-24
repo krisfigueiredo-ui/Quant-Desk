@@ -1,0 +1,49 @@
+name: Security checks
+
+on:
+  push:
+    branches: ["main", "feature/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Review dependency changes
+        id: dependency-review
+        continue-on-error: true
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+      - name: Set up Python for dependency-audit fallback
+        if: steps.dependency-review.outcome == 'failure'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Audit resolved Python dependencies
+        if: steps.dependency-review.outcome == 'failure'
+        run: |
+          python -m pip install --upgrade pip "setuptools>=83"
+          python -m pip install --editable .
+          python -m pip install pip-audit
+          python -m pip_audit --skip-editable

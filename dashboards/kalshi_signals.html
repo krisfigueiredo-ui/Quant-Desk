@@ -4,13 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kalshi Signal Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --void:#0b0d10; --slate:#171c22; --slate2:#12161b; --line:#252c36; --line2:#344050;
-    --ink:#e7eaf0; --mute:#8b949e; --faint:#667085;
-    --phosphor:#60a5fa; --gold:#f59e0b; --coral:#ef4444; --green:#22c55e;
-    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-    --disp:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --void:#f1f2ef; --slate:#f5f6f3; --slate2:#fbfcfa; --line:#d9ddd8; --line2:#bac2bd;
+    --ink:#172027; --mute:#667178; --faint:#8b9498;
+    --phosphor:#3155c6; --gold:#a5630a; --coral:#b83c41; --green:#14735a;
+    --mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+    --disp:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
@@ -19,12 +22,12 @@
   .wrap{max-width:1200px;margin:0 auto;padding:0 22px}
 
   header{position:sticky;top:0;z-index:30;
-    background:rgba(11,13,16,.92);
+    background:rgba(251,252,250,.94);
     backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
   .head{display:flex;align-items:center;justify-content:space-between;gap:18px;
     flex-wrap:wrap;padding:16px 0 15px}
   .brand{display:flex;align-items:center;gap:13px}
-  .glyph{width:30px;height:30px;border:1px solid var(--line2);background:var(--slate);border-radius:7px;
+  .glyph{width:32px;height:32px;border:1px solid #26343c;background:#10181e;border-radius:4px;
     display:grid;place-items:center;position:relative;flex:none}
   .glyph::before{content:"";width:12px;height:8px;border-left:2px solid var(--phosphor);border-bottom:2px solid var(--phosphor)}
   .glyph::after{content:"";position:absolute;width:11px;height:1px;background:var(--phosphor);transform:rotate(-32deg)}
@@ -33,17 +36,17 @@
     letter-spacing:.14em;text-transform:uppercase;margin-top:1px}
   .tools{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px}
   .live-tag{display:flex;align-items:center;gap:7px;color:var(--mute);
-    padding:6px 11px;border:1px solid var(--line);border-radius:20px;background:var(--slate2)}
+    padding:7px 11px;border:1px solid var(--line);border-radius:4px;background:var(--slate2);text-transform:uppercase;letter-spacing:.04em}
   .dot{width:7px;height:7px;border-radius:50%;background:var(--faint);flex:none}
   .dot.on{background:var(--green)}
   .dot.off{background:var(--coral)}
   .btn{font-family:var(--mono);font-size:11px;color:var(--ink);background:var(--slate);
-    border:1px solid var(--line2);border-radius:8px;padding:7px 13px;cursor:pointer;
+    border:1px solid var(--line2);border-radius:4px;padding:7px 13px;cursor:pointer;
     transition:.15s;letter-spacing:.02em}
   .btn:hover{border-color:var(--phosphor);color:var(--phosphor)}
   .btn:focus-visible{outline:2px solid var(--phosphor);outline-offset:2px}
   .btn:disabled{opacity:.4;cursor:default}
-  .btn.on{border-color:var(--phosphor);color:var(--phosphor);background:rgba(94,234,212,.08)}
+  .btn.on{border-color:var(--phosphor);color:var(--phosphor);background:#e8ecf9}
 
   .hero{padding:30px 0 4px}
   .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
@@ -56,7 +59,7 @@
   .lede b{color:var(--ink);font-weight:500}
 
   .cluster{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin:30px 0 8px;
-    background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+    background:var(--line);border:1px solid var(--line);border-radius:5px;overflow:hidden}
   .gauge{background:var(--slate2);padding:16px 18px;position:relative}
   .gauge .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
   .gauge .v{font-family:var(--mono);font-size:24px;font-weight:600;letter-spacing:-.02em;margin-top:8px;line-height:1}
@@ -64,13 +67,13 @@
   .gauge.accent .v{color:var(--green)}
   .gauge.danger .v{color:var(--coral)}
 
-  .frame{border:1px solid var(--line);border-radius:14px;background:var(--slate2);
+  .frame{border:1px solid var(--line);border-radius:5px;background:var(--slate2);
     margin:22px 0;overflow:hidden}
   .frame-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
     padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
   .frame-head h2{font-size:13px;font-weight:600;letter-spacing:.02em}
   .frame-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-  .filter{font-family:var(--mono);font-size:10px;color:var(--mute);border:1px solid var(--line);background:transparent;border-radius:7px;padding:6px 9px;cursor:pointer}
+  .filter{font-family:var(--mono);font-size:10px;color:var(--mute);border:1px solid var(--line);background:transparent;border-radius:4px;padding:6px 9px;cursor:pointer}
   .filter.active{color:var(--ink);border-color:var(--line2);background:var(--slate)}
   .legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--mute)}
   .legend span{display:flex;align-items:center;gap:7px}
@@ -82,10 +85,10 @@
     color:var(--faint);padding:12px 18px;border-bottom:1px solid var(--line)}
   .thead .r{text-align:right}
   .rows{display:flex;flex-direction:column}
-  .row{padding:14px 18px;border-bottom:1px solid rgba(31,42,57,.55);font-size:13px;
+  .row{padding:14px 18px;border-bottom:1px solid var(--line);font-size:13px;
     transition:background .14s;position:relative}
   .row:last-child{border-bottom:none}
-  .row:hover{background:rgba(94,234,212,.025)}
+  .row:hover{background:#f7f8f5}
   .row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:transparent}
   .row.go::before{background:var(--green)}
   .row.no::before{background:var(--coral)}
@@ -115,7 +118,7 @@
   @keyframes spin{to{transform:rotate(360deg)}}
 
   .notes{padding:22px 0 10px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
-  .note{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--slate2)}
+  .note{border:1px solid var(--line);border-left:3px solid var(--phosphor);border-radius:5px;padding:16px 18px;background:var(--slate2)}
   .note h3{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
     color:var(--phosphor);margin-bottom:9px}
   .note.warn h3{color:var(--gold)}
