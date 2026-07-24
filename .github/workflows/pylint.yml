@@ -1,8 +1,8 @@
-name: Python checks
+name: Platform validation
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "feature/**"]
   pull_request:
   workflow_dispatch:
 
@@ -10,27 +10,70 @@ permissions:
   contents: read
 
 jobs:
-  validate:
+  python:
     runs-on: ubuntu-latest
+    env:
+      TRADING_MODE: PAPER
+      LIVE_EQUITIES_ENABLED: "false"
+      LIVE_CRYPTO_ENABLED: "false"
+      AUTONOMOUS_EXECUTION_ENABLED: "false"
+      PYTHONPYCACHEPREFIX: /tmp/quant-desk-pyc
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Compile Python sources
-        run: python -m compileall -q bots scripts
-      - name: Validate notebook documents
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
+          cache: pip
+      - name: Install platform and test dependencies
+        run: pip install -e ".[dev]"
+      - name: Verify live trading is disabled
+        run: python scripts/verify_live_disabled.py
+      - name: Ruff formatting
+        run: >
+          ruff format --check src apps tests
+          scripts/create_restricted_live_record.py
+          scripts/emergency_stop.py scripts/generate_communication_report.py
+          scripts/reconcile_accounts.py scripts/run_api.py
+          scripts/run_backtest.py scripts/run_paper.py scripts/run_shadow.py
+          scripts/run_walk_forward.py scripts/run_workers.py
+          scripts/verify_live_disabled.py
+      - name: Ruff lint
+        run: >
+          ruff check src apps tests
+          scripts/create_restricted_live_record.py
+          scripts/emergency_stop.py scripts/generate_communication_report.py
+          scripts/reconcile_accounts.py scripts/run_api.py
+          scripts/run_backtest.py scripts/run_paper.py scripts/run_shadow.py
+          scripts/run_walk_forward.py scripts/run_workers.py
+          scripts/verify_live_disabled.py
+      - name: Strict typing
+        run: mypy src apps scripts
+      - name: Test suite
+        run: pytest --cov=quant_trade_desk --cov-report=term-missing
+      - name: Compile retained paper bots and platform
+        run: python -m compileall -q bots src apps scripts
+      - name: Validate initial migration
+        env:
+          QUANT_DESK_DATABASE_URL: sqlite:////tmp/quant-desk-migration.db
+        run: alembic upgrade head
+      - name: Generate synthetic communication report
+        run: python scripts/generate_communication_report.py --synthetic --sample
 
-          notebooks = sorted(Path("notebooks").glob("*.ipynb"))
-          if not notebooks:
-              raise SystemExit("No notebooks found")
-          for path in notebooks:
-              payload = json.loads(path.read_text(encoding="utf-8"))
-              if payload.get("nbformat") != 4 or not isinstance(payload.get("cells"), list):
-                  raise SystemExit(f"Invalid notebook structure: {path}")
-              print(f"validated {path}")
-          PY
+  dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: JavaScript syntax
+        run: node --check dashboard/app.js
+      - name: Static console contract tests
+        run: |
+          python -m pip install pytest
+          pytest tests/dashboard
+      - name: Verify static Pages bundle
+        run: |
+          test -f dashboard/index.html
+          test -f dashboard/styles.css
+          test -f reports/sample-agent-communication.html
