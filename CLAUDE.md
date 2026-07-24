@@ -1,64 +1,71 @@
-# CLAUDE.md — project guide for Claude Code
+# CLAUDE.md — Quant Desk contributor guide
 
-## What this is
-A **paper-trading research desk**. It screens equities and crypto with a factor/momentum
-model, paper-trades them on Alpaca, guards positions with a daily stop/take-profit manager,
-and monitors everything from a read-only dashboard. This is research and paper trading —
-**not** a live-money system and not investment advice.
+## Purpose
 
-## Hard rules (do not violate)
-- **Paper only.** Every bot constructs `TradingClient(key, secret, paper=True)`. Never change
-  `paper=True` to `False`. Never add a live endpoint.
-- **No secrets in code or git.** Keys come from environment variables only. `.env` is gitignored.
-  Never hardcode a key, never print a full key, never commit one.
-- **`DRY_RUN` defaults to true.** Code must treat missing/true as "log intended orders, submit nothing."
-- **The dashboard is read-only.** `dashboards/bot_dashboard.html` must never gain order-placement code.
-- **Don't invent an edge.** The research notebook is deliberately built to report when a strategy
-  does NOT work (near-zero IC, failing t-stats, ML losing to the simple rule). Preserve that honesty;
-  don't tune parameters just to make a backtest look good.
+Quant Desk is a paper-default multi-agent quantitative research and operations
+desk. It contains retained Alpaca paper bots plus a new typed control plane.
+Research may propose; deterministic services calculate, authorize, execute, and
+audit.
 
-## Layout
+## Non-negotiable rules
+
+- Keep `TRADING_MODE=PAPER`, both live flags false, and autonomy false during
+  development and CI.
+- Never submit a real order, connect a funded account without the user, store a
+  credential, use browser automation for brokerage, or call an unofficial
+  broker endpoint.
+- Never change legacy Alpaca clients from `paper=True`.
+- Never let a dashboard, TradingView alert, analysis agent, Portfolio Manager,
+  or Risk Engine call a broker.
+- Fail closed on stale/unknown account, market, risk, audit, database, queue,
+  time, broker, or order state.
+- Acknowledgement is not fill; unknown state blocks resubmission.
+- Strategy lots are isolated. A day strategy cannot sell a long-term lot.
+- Do not manufacture backtest data, tune against untouched tests, or claim
+  benchmark outperformance.
+- Live activation and hard-kill reset are offline human procedures, never LLM
+  actions.
+
+## Key paths
+
+```text
+src/quant_trade_desk/
+  agents/ communication/ strategies/ risk/ portfolio/
+  execution/ storage/ observability/ api/ reports/ tradingview/
+apps/                  API and worker entry points
+dashboard/             operations console; no broker calls
+config/                conservative examples
+migrations/            Alembic
+tests/                 unit/integration/contract/security/failure/dashboard
+bots/ dashboards/      retained legacy paper-only tools
 ```
-bots/
-  auto_paper_trader.py         # equity factor strategy, monthly rebalance
-  auto_paper_trader_crypto.py  # crypto momentum, weekly rebalance
-  exit_manager.py              # daily stop-loss / take-profit guard (stocks + crypto)
-dashboards/
-  bot_dashboard.html           # live read-only monitor (open in browser, paste paper keys)
-  kalshi_signals.html          # Kalshi arbitrage signal scanner (public data)
-notebooks/
-  impact_quant_strategy.ipynb  # full research: factors, grades, backtest, Monte Carlo, ML
-  Colab_Launcher.ipynb         # one-tab Colab runner for the bots
-research/
-  SETUP_paper_trader.md        # setup + scheduling guide
-.github/workflows/paper_bots.yml  # schedules all three bots on GitHub's servers
-```
 
-## Run locally
+Read `docs/architecture.md`, `docs/agent-communication.md`,
+`docs/agent-permissions-matrix.md`, and `docs/risk-controls.md` before changing
+control or execution boundaries.
+
+## Validation
+
+Use Python 3.11+:
+
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env          # then edit .env with your PAPER keys
-set -a && source .env && set +a
-python bots/auto_paper_trader.py          # dry run by default
-python bots/auto_paper_trader_crypto.py
-python bots/exit_manager.py
+source .venv/bin/activate
+ruff format --check src apps tests scripts
+ruff check src apps tests scripts
+mypy src apps scripts
+pytest
+node --check dashboard/app.js
+python scripts/verify_live_disabled.py
 ```
-Each bot self-gates: the equity bot acts only on the first trading day of the month, crypto only
-on Mondays, the exit manager runs daily. Running any of them off-schedule just logs "holding."
 
-## Scheduling
-`.github/workflows/paper_bots.yml` runs the three bots on GitHub Actions. Add repo secrets
-(`ALPACA_API_KEY`, `ALPACA_SECRET_KEY`, and optional Slack/email ones). Jobs ship with
-`DRY_RUN: "true"` — flip to `"false"` in the workflow after reviewing the dry-run summaries.
+Legacy bots predate strict Ruff formatting; syntax-compile them rather than
+performing unrelated rewrites. Before staging, review the diff and scan for
+secrets, account numbers, private records, raw databases, and unredacted logs.
 
-## Common tasks you might be asked to do
-- Adjust the universe or factor weights: edit the `UNIVERSE` / `CONFIG` blocks at the top of each bot.
-- Change exit thresholds: `STOP_PCT` / `TAKE_PCT` env vars (see `.env.example`).
-- Add a notifier or a new schedule: follow the existing patterns in the bot files and the workflow.
-- Before committing, confirm no secret is staged: `git diff --cached | grep -iE "PK|secret|key"`.
+## Execution adapters
 
-## Testing changes
-There's no formal test suite in the repo (the original build validated logic with synthetic data).
-When you change bot math, sanity-check with a quick synthetic-data script rather than live calls,
-and keep `DRY_RUN=true` for any end-to-end run.
+Robinhood Agentic equity execution is a typed official-MCP bridge, not an
+invented REST client. Robinhood Crypto uses the documented v2 API and Ed25519
+signing. Both remain disabled until authenticated capability discovery,
+dedicated account verification, reconciliation, observation, and separate
+offline readiness records succeed.
