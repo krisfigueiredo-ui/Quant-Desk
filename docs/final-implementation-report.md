@@ -4,7 +4,7 @@ Report date: 2026-07-24
 
 Branch: `feature/multi-agent-live-trading-desk`
 
-Pull request: pending final push
+Pull request: [#2 — Build fail-closed multi-agent quantitative trading desk](https://github.com/krisfigueiredo-ui/Quant-Desk/pull/2) (draft)
 
 ## Outcome
 
