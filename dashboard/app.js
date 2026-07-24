@@ -15,16 +15,29 @@ const state = {
 };
 
 const pageMeta = {
-  overview: ["Executive overview", "Verified portfolio state, exposure, benchmark context, and system health."],
-  agents: ["Agent operations", "Typed message topology, health, throughput, and auditable decision traces."],
-  "day-desk": ["Day-trading desk", "Separate equity and crypto intraday candidates, limits, and trade-state monitoring."],
-  "long-term": ["Long-term desk", "Thesis-led holdings, target allocations, review state, and benchmark context."],
+  overview: ["Portfolio overview", "Verified capital, exposure, benchmark context, and operating health in one view."],
+  agents: ["Agent network", "Typed message topology, throughput, health, and auditable decision traces."],
+  "day-desk": ["Intraday desk", "Separate equity and crypto candidates, limits, and trade-state monitoring."],
+  "long-term": ["Long-horizon book", "Thesis-led holdings, target allocations, review state, and benchmark context."],
   scanner: ["Market scanner", "Deterministically ranked equity and crypto candidates with explicit eligibility."],
-  strategies: ["Strategy lab", "Registry, validation status, allocation limits, plateau state, and decay controls."],
-  risk: ["Risk command center", "Non-bypassable exposure, loss, drawdown, data-quality, and kill-switch controls."],
-  orders: ["Orders & executions", "End-to-end proposed-order, authorization, broker, fill, and reconciliation state."],
-  audit: ["Communication & audit", "Structured agent messages, decision timelines, conversion metrics, and exports."],
-  settings: ["Settings & integrations", "Operating mode, adapters, data services, versions, and secret-safe status."],
+  strategies: ["Strategy research", "Validation state, allocation limits, plateau detection, and decay controls."],
+  risk: ["Risk controls", "Non-bypassable exposure, loss, drawdown, data-quality, and kill-switch safeguards."],
+  orders: ["Order ledger", "Proposals, authorization, broker state, fills, and reconciliation in one chain."],
+  audit: ["Decision audit", "Structured agent messages, decision timelines, conversion metrics, and exports."],
+  settings: ["System configuration", "Operating mode, adapters, data services, versions, and secret-safe status."],
+};
+
+const pageSections = {
+  overview: "Monitor",
+  agents: "Monitor",
+  "day-desk": "Investment desks",
+  "long-term": "Investment desks",
+  scanner: "Investment desks",
+  strategies: "Investment desks",
+  risk: "Control & records",
+  orders: "Control & records",
+  audit: "Control & records",
+  settings: "Control & records",
 };
 
 const escapeHtml = (value) => String(value ?? "—").replace(/[&<>"']/g, (char) => ({
@@ -61,14 +74,14 @@ function lineChart(series) {
   const scaleY = (value) => height - pad - ((value - min) / Math.max(max - min, 1)) * (height - pad * 2);
   const pathFor = (field) => series.map((row, index) => `${index ? "L" : "M"}${scaleX(index).toFixed(1)},${scaleY(Number(row[field])).toFixed(1)}`).join(" ");
   const grid = [0.25, 0.5, 0.75].map((ratio) => `<line x1="0" x2="${width}" y1="${height * ratio}" y2="${height * ratio}"/>`).join("");
-  return `<div class="chart-wrap"><div class="legend"><span><i></i>Portfolio</span><span><i class="secondary"></i>SPY</span></div><svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="Portfolio and SPY comparison"><defs><linearGradient id="area-gradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#69a7ff"/><stop offset="1" stop-color="#69a7ff" stop-opacity="0"/></linearGradient></defs><g class="chart-grid">${grid}</g><path class="chart-line" d="${pathFor("portfolio")}"/><path class="chart-line secondary" d="${pathFor("spy")}"/></svg></div>`;
+  return `<div class="chart-wrap"><div class="legend"><span><i></i>Portfolio</span><span><i class="secondary"></i>SPY</span></div><svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="Portfolio and SPY comparison"><defs><linearGradient id="area-gradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs><g class="chart-grid">${grid}</g><path class="chart-line" pathLength="1" d="${pathFor("portfolio")}"/><path class="chart-line secondary" pathLength="1" d="${pathFor("spy")}"/></svg></div>`;
 }
 
 function heading(page) {
   const [title, description] = pageMeta[page] || pageMeta.overview;
   const asOf = state.lastRefresh ? `REFRESHED ${state.lastRefresh.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "AWAITING DATA";
   document.querySelector("#page-heading").className = "page-heading";
-  document.querySelector("#page-heading").innerHTML = `<div><div class="eyebrow">Quantitative operations / ${escapeHtml(page.replace("-", " "))}</div><h1>${escapeHtml(title)}</h1><p>${escapeHtml(description)}</p></div><div class="page-heading-meta">${escapeHtml(asOf)}<br>UTC SOURCE TIMESTAMPS</div>`;
+  document.querySelector("#page-heading").innerHTML = `<div><div class="eyebrow">${escapeHtml(pageSections[page])}<i></i>${escapeHtml(page.replace("-", " "))}</div><h1>${escapeHtml(title)}</h1><p>${escapeHtml(description)}</p></div><div class="page-heading-meta">${escapeHtml(asOf)}<br>UTC SOURCE TIMESTAMPS</div>`;
 }
 
 function renderOverview() {
@@ -198,7 +211,12 @@ function currentPage() {
 
 function render() {
   const page = currentPage();
-  document.querySelectorAll("#primary-nav a").forEach((item) => item.classList.toggle("active", item.dataset.page === page));
+  document.querySelectorAll("#primary-nav a").forEach((item) => {
+    const active = item.dataset.page === page;
+    item.classList.toggle("active", active);
+    if (active) item.setAttribute("aria-current", "page");
+    else item.removeAttribute("aria-current");
+  });
   heading(page);
   document.querySelector("#page-content").innerHTML = renderers[page]();
   document.querySelector(".sidebar").classList.remove("open");
@@ -215,6 +233,15 @@ function bindDynamicEvents(page) {
       const fields = ["message_id", "message_type", "agent_id", "symbol", "created_at", "status", "summary", "trace_id"];
       const csv = [fields.join(","), ...state.messages.map((row) => fields.map((field) => `"${String(row[field] ?? "").replaceAll('"', '""')}"`).join(","))].join("\n");
       download("quant-desk-messages-synthetic.csv", "text/csv", csv);
+    });
+  }
+  if (page === "scanner") {
+    const search = document.querySelector("#scanner-search");
+    search?.addEventListener("input", () => {
+      const query = search.value.trim().toLowerCase();
+      document.querySelectorAll(".table-wrap tbody tr").forEach((row) => {
+        row.hidden = Boolean(query) && !row.textContent.toLowerCase().includes(query);
+      });
     });
   }
 }
@@ -245,6 +272,9 @@ async function loadData() {
 }
 
 const controlDialog = document.querySelector("#control-dialog");
+const commandDialog = document.querySelector("#command-dialog");
+const commandSearch = document.querySelector("#command-search");
+const commandResults = document.querySelector("#command-results");
 let pendingControl = null;
 function openControl(action, phrase) {
   pendingControl = action;
@@ -279,6 +309,62 @@ document.querySelector("#control-form").addEventListener("submit", async (event)
 });
 
 document.querySelector("#control-cancel").addEventListener("click", () => controlDialog.close());
+
+function renderCommandResults(query = "") {
+  const normalized = query.trim().toLowerCase();
+  const results = Object.entries(pageMeta).filter(([page, [title, description]]) => (
+    `${page} ${title} ${description} ${pageSections[page]}`.toLowerCase().includes(normalized)
+  ));
+  commandResults.innerHTML = results.length ? results.map(([page, [title, description]], index) => `
+    <button class="command-result${index === 0 ? " active" : ""}" type="button" role="option" aria-selected="${index === 0}" data-command-page="${page}">
+      <span class="command-index">${String(Object.keys(pageMeta).indexOf(page) + 1).padStart(2, "0")}</span>
+      <span><b>${escapeHtml(title)}</b><small>${escapeHtml(description)}</small></span>
+      <kbd>↵</kbd>
+    </button>
+  `).join("") : '<div class="command-empty">No matching workspace view</div>';
+  commandResults.querySelectorAll("[data-command-page]").forEach((button) => button.addEventListener("click", () => {
+    window.location.hash = button.dataset.commandPage;
+    commandDialog.close();
+  }));
+}
+
+function openCommandDialog() {
+  renderCommandResults();
+  if (!commandDialog.open) commandDialog.showModal();
+  commandSearch.value = "";
+  requestAnimationFrame(() => commandSearch.focus());
+}
+
+document.querySelector("#command-button").addEventListener("click", openCommandDialog);
+document.querySelector("#command-close").addEventListener("click", () => commandDialog.close());
+commandSearch.addEventListener("input", () => renderCommandResults(commandSearch.value));
+commandSearch.addEventListener("keydown", (event) => {
+  const results = [...commandResults.querySelectorAll("[data-command-page]")];
+  if (!results.length) return;
+  const currentIndex = Math.max(results.findIndex((item) => item.classList.contains("active")), 0);
+  let nextIndex = currentIndex;
+  if (event.key === "ArrowDown") nextIndex = (currentIndex + 1) % results.length;
+  else if (event.key === "ArrowUp") nextIndex = (currentIndex - 1 + results.length) % results.length;
+  else if (event.key === "Enter") {
+    event.preventDefault();
+    results[currentIndex].click();
+    return;
+  } else return;
+  event.preventDefault();
+  results.forEach((item, index) => {
+    item.classList.toggle("active", index === nextIndex);
+    item.setAttribute("aria-selected", String(index === nextIndex));
+  });
+  results[nextIndex].scrollIntoView({ block: "nearest" });
+});
+document.addEventListener("keydown", (event) => {
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+    event.preventDefault();
+    if (commandDialog.open) commandDialog.close();
+    else openCommandDialog();
+  }
+});
+
 document.querySelector("#refresh-button").addEventListener("click", loadData);
 document.querySelector("#nav-toggle").addEventListener("click", () => document.querySelector(".sidebar").classList.toggle("open"));
 document.querySelector("#theme-toggle").addEventListener("click", () => {
@@ -290,5 +376,5 @@ window.addEventListener("hashchange", render);
 setInterval(() => {
   document.querySelector("#utc-clock").textContent = `${new Date().toISOString().slice(11, 19)} UTC`;
 }, 1000);
-document.documentElement.dataset.theme = localStorage.getItem("quant-desk-theme") || "dark";
+document.documentElement.dataset.theme = localStorage.getItem("quant-desk-theme") || "light";
 loadData();
