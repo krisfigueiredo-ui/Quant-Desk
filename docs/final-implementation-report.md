@@ -159,7 +159,9 @@ errors, and the emergency-stop token/exact-phrase dialog.
 - Non-root Docker image and local PostgreSQL/Redis Compose services.
 - GitHub workflows for tests, Ruff, strict typing, migration, frontend/static
   checks, report generation, secret detection, dependency review, Pages, and
-  Docker build. CI contains no broker credential or live broker test.
+  Docker build. When GitHub Dependency Review is unavailable, a vulnerability
+  audit of the resolved Python dependencies runs instead. CI contains no broker
+  credential or live broker test.
 
 ## Final verification
 
@@ -178,8 +180,10 @@ errors, and the emergency-stop token/exact-phrase dialog.
 | Local API health/readiness | Healthy/ready, PAPER_ONLY broker |
 | Dashboard runtime | API connected, PAPER, no console errors/overflow |
 | Live-disabled guard | Passed |
-| Local Docker build | Not run; Docker CLI unavailable, CI build configured |
-| Secret scan | Local pattern/diff scan passed; Gitleaks configured in CI |
+| Dependency audit | Passed; no known vulnerabilities in the resolved environment |
+| Local Docker build | Not run; Docker CLI unavailable |
+| GitHub Actions | Platform validation, security checks, and container build passed |
+| Secret scan | Full feature-history Gitleaks scan passed with only fingerprint-specific fixture exclusions |
 
 One third-party deprecation warning remains in FastAPI’s current TestClient
 dependency path (`httpx`/Starlette). It does not affect application behavior.
@@ -236,8 +240,38 @@ These gaps keep live readiness false.
 6. Authenticate official brokers with the user present; inspect actual
    capabilities and dedicated accounts; reconcile every position/order.
 7. Satisfy and evidence every item in `docs/live-readiness.md`.
-8. Only then create separate local equity/crypto readiness records with their
-   exact asset-specific phrases. Standard live must remain disabled.
+8. Only then follow the exact restricted-live procedure below. Standard live
+   must remain disabled.
 
-The exact restricted-live activation procedure is intentionally isolated in
-`docs/live-readiness.md`; it was not executed during development.
+## Exact restricted-live activation procedure
+
+This procedure was built but not executed. Do not start it until every gate has
+independent evidence and approval.
+
+1. Keep the application stopped. Pull and verify the approved commit.
+2. Run every verification in `docs/ops-runbook.md` and archive the results.
+3. Authenticate the official adapter through its supported user-facing flow.
+4. Run read-only capability discovery; do not submit an order.
+5. Verify the dedicated account and reconcile cash, total equity, positions,
+   open orders, and unknown orders.
+6. Create a local JSON checklist with every `ReadinessChecklist` field set to
+   `true`; review and sign/version it outside the repository.
+7. For equities only, run
+   `python scripts/create_restricted_live_record.py --asset-class equity
+   --checklist /secure/path/equity-checklist.json`, enter the dedicated account
+   ID at the hidden prompt, and type exactly
+   `ENABLE RESTRICTED LIVE EQUITY TRADING`.
+8. For crypto only, repeat with `--asset-class crypto` and type exactly
+   `ENABLE RESTRICTED LIVE CRYPTO TRADING`.
+9. Verify mode `0600` and the hashes in each separate local readiness record.
+10. Set only the intended asset flag and `TRADING_MODE=RESTRICTED_LIVE`;
+    keep `AUTONOMOUS_EXECUTION_ENABLED=false` for the first controlled
+    observation. Standard live remains rejected.
+11. Start one service, confirm the restricted-live dashboard warning and
+    dedicated account identity, then require separate operator approval before
+    any manually reviewed minimum-size test.
+
+The general phrase `ENABLE RESTRICTED LIVE TRADING` cannot replace either
+asset-specific phrase. Ordinary prose is never interpreted as activation.
+Restarting without the exact local readiness records cannot expand
+authorization.
