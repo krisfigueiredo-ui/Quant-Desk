@@ -19,6 +19,7 @@ from quant_trade_desk.communication.schemas import (
 class LongTermInvestmentAgent:
     agent_id = "long-term-investment-agent"
     version = "1.0.0"
+    strategy_id = "equity-quality-momentum-v1"
 
     def create_intent(
         self,
@@ -41,6 +42,7 @@ class LongTermInvestmentAgent:
         ):
             return None
         return TradeIntentPayload(
+            strategy_id=self.strategy_id,
             side=Side.BUY,
             quantity=quantity,
             order_type=OrderType.LIMIT,
@@ -49,4 +51,5 @@ class LongTermInvestmentAgent:
             expected_holding_seconds=expected_holding_seconds,
             invalidation_reason="Fundamental thesis or long-horizon trend invalidation.",
             planned_loss=planned_loss,
+            time_horizon="LONG_TERM",
         )

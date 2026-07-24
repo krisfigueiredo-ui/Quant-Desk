@@ -57,6 +57,12 @@ class PortfolioManager:
                 conflicts=("STRATEGY_LOT_ASSET_MISMATCH",),
                 reason_codes=("LOT_OWNERSHIP_MISMATCH",),
             )
+        if lot.strategy_id != intent.strategy_id:
+            return ProposalResult(
+                order=None,
+                conflicts=("STRATEGY_LOT_OWNER_MISMATCH",),
+                reason_codes=("CROSS_STRATEGY_LIQUIDATION_BLOCKED",),
+            )
         if intent.side.value == "SELL" and intent.quantity > lot.quantity:
             return ProposalResult(
                 order=None,

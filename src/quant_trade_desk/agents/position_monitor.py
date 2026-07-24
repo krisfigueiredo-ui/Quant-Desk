@@ -39,6 +39,7 @@ class PositionMonitor:
         if not reasons or lot.quantity <= 0:
             return None
         return TradeIntentPayload(
+            strategy_id=lot.strategy_id,
             side=Side.SELL,
             quantity=lot.quantity,
             order_type=OrderType.LIMIT,

@@ -8,9 +8,28 @@ from quant_trade_desk.execution.execution_agent import (
     ExecutionAgent,
     ExecutionPreflight,
 )
-from quant_trade_desk.execution.models import BrokerOrderState, BrokerQuote
+from quant_trade_desk.execution.models import (
+    BrokerOrderRequest,
+    BrokerOrderResult,
+    BrokerOrderState,
+    BrokerQuote,
+)
 from quant_trade_desk.execution.paper_broker import PaperBroker
 from quant_trade_desk.risk.engine import RiskContext, RiskEngine
+from quant_trade_desk.risk.operating_mode import authorize_mode
+from quant_trade_desk.settings import Settings, TradingMode
+
+
+class FakeLiveBroker(PaperBroker):
+    adapter_id = "fake-live-broker"
+
+    def __init__(self) -> None:
+        super().__init__(account_id="paper-account")
+        self.submitted = False
+
+    def submit_order(self, request: BrokerOrderRequest) -> BrokerOrderResult:
+        self.submitted = True
+        return super().submit_order(request)
 
 
 def _preflight(context: RiskContext) -> ExecutionPreflight:
@@ -184,3 +203,35 @@ def test_stale_preflight_blocks_submission(
     )
     assert result.state == BrokerOrderState.REJECTED
     assert "MARKET_DATA_STALE" in result.reason_code
+
+
+def test_paper_and_shadow_modes_cannot_reach_live_adapter(
+    proposed_order: object,
+    risk_context: RiskContext,
+) -> None:
+    decision = RiskEngine().evaluate(proposed_order, risk_context)  # type: ignore[arg-type]
+    for mode in (TradingMode.PAPER, TradingMode.SHADOW):
+        adapter = FakeLiveBroker()
+        adapter.set_quote(
+            BrokerQuote(
+                symbol="SPY",
+                timestamp=risk_context.now,
+                bid=Decimal("99.95"),
+                ask=Decimal("100.05"),
+            )
+        )
+        authorization = authorize_mode(Settings(trading_mode=mode))
+        result = ExecutionAgent().execute(
+            order=proposed_order,  # type: ignore[arg-type]
+            risk_decision=decision,
+            mode_authorization=authorization,
+            adapter=adapter,
+            asset_class=AssetClass.EQUITY,
+            symbol="SPY",
+            idempotency_key=f"mode-isolation-{mode.value}",
+            preflight=_preflight(risk_context),
+            now=risk_context.now,
+        )
+        assert result.state == BrokerOrderState.REJECTED
+        assert f"{mode.value}_MODE_ADAPTER_MISMATCH" in result.reason_code
+        assert adapter.submitted is False

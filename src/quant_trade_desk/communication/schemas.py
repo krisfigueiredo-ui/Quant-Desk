@@ -176,6 +176,7 @@ class EventRiskPayload(FrozenModel):
 
 class TradeIntentPayload(FrozenModel):
     intent_id: UUID = Field(default_factory=uuid4)
+    strategy_id: str = Field(min_length=1, max_length=128)
     side: Side
     quantity: Decimal = Field(gt=0)
     order_type: OrderType = OrderType.LIMIT

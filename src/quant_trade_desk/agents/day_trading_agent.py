@@ -18,6 +18,7 @@ from quant_trade_desk.communication.schemas import (
 class DayTradingAgent:
     agent_id = "day-trading-strategy-agent"
     version = "1.0.0"
+    strategy_id = "equity-intraday-trend-pullback-v1"
 
     def create_intent(
         self,
@@ -40,6 +41,7 @@ class DayTradingAgent:
         ):
             return None
         return TradeIntentPayload(
+            strategy_id=self.strategy_id,
             side=Side.BUY,
             quantity=quantity,
             order_type=OrderType.LIMIT,
