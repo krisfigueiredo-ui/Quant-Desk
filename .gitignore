@@ -17,6 +17,12 @@ __pycache__/
 venv/
 .pytest_cache/
 .mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
 
 # Notebooks
 .ipynb_checkpoints/
@@ -25,3 +31,18 @@ venv/
 .DS_Store
 .idea/
 .vscode/
+
+# Local application state and generated reports
+quant_desk.db
+quant_desk.db-*
+*.sqlite
+*.sqlite3
+reports/agent-communication-*.html
+reports/agent-communication-*.json
+reports/agent-communication-*.csv
+!reports/sample-agent-communication.html
+!reports/sample-agent-communication.json
+!reports/sample-agent-communication.csv
+
+# Local live-activation and kill-switch state
+.quant-desk-state/
