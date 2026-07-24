@@ -8,7 +8,6 @@ import json
 from collections import defaultdict, deque
 from datetime import UTC, datetime, timedelta
 from threading import RLock
-from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -20,7 +19,7 @@ class TradingViewSignal(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     schema_version: str = Field(pattern=r"^\d+\.\d+\.\d+$")
-    signal_id: UUID
+    signal_id: str = Field(min_length=8, max_length=128, pattern=r"^[A-Za-z0-9._:-]+$")
     strategy_id: str
     asset_class: AssetClass
     symbol: str

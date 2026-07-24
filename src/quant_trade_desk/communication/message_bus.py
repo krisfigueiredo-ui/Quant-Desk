@@ -10,6 +10,7 @@ from typing import Protocol
 
 from .dead_letter_queue import DeadLetter, InMemoryDeadLetterQueue
 from .idempotency import IdempotencyStore
+from .routing import producer_allowed
 from .schemas import AgentMessage, MessageReceipt, MessageStatus, MessageType
 
 MessageHandler = Callable[[AgentMessage], None]
@@ -87,6 +88,15 @@ class InMemoryMessageBus:
                 reason_code="AUDIT_UNAVAILABLE",
                 received_at=instant,
             )
+        if not producer_allowed(message.agent_id, message.message_type):
+            receipt = MessageReceipt(
+                message_id=message.message_id,
+                status=MessageStatus.REJECTED,
+                reason_code="PRODUCER_PERMISSION_DENIED",
+                received_at=instant,
+            )
+            self._audit.append_message(message, receipt)
+            return receipt
         if message.expired(instant):
             receipt = MessageReceipt(
                 message_id=message.message_id,

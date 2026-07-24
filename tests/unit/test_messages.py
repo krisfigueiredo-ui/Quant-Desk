@@ -81,3 +81,13 @@ def test_audit_failure_blocks_message(now: object) -> None:
     receipt = InMemoryMessageBus(audit).publish(_message(now))
     assert receipt.status == MessageStatus.REJECTED
     assert receipt.reason_code == "AUDIT_UNAVAILABLE"
+
+
+def test_agent_cannot_emit_an_unauthorized_message_type(now: object) -> None:
+    unauthorized = _message(now).model_copy(update={"agent_id": "equity-market-scanner"})
+    receipt = InMemoryMessageBus(InMemoryAuditSink()).publish(
+        unauthorized,
+        now=now,  # type: ignore[arg-type]
+    )
+    assert receipt.status == MessageStatus.REJECTED
+    assert receipt.reason_code == "PRODUCER_PERMISSION_DENIED"

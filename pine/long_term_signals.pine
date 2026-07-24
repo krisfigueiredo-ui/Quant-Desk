@@ -1,0 +1,26 @@
+//@version=6
+indicator("Quant Desk Long-Term Research Input v1", overlay=true)
+
+// A technical candidate is only one input. Fundamental facts, valuation,
+// event risk, portfolio conflicts, and deterministic risk remain mandatory.
+trendLength = input.int(200, "Trend SMA", minval=50)
+relativeLength = input.int(63, "Momentum bars", minval=20)
+trend = ta.sma(close, trendLength)
+momentum = close / close[relativeLength] - 1
+longSignal = ta.crossover(close, trend) and momentum > 0
+
+plot(trend, "Trend SMA", color=color.new(color.blue, 0))
+
+if longSignal and barstate.isconfirmed
+    signalId = syminfo.tickerid + "-long-term-" + str.tostring(time_close)
+    observedAt = str.format_time(time_close, "yyyy-MM-dd'T'HH:mm:ss'Z'", "UTC")
+    expiresAt = str.format_time(time_close + 86400000, "yyyy-MM-dd'T'HH:mm:ss'Z'", "UTC")
+    payload = '{"schema_version":"1.0.0","signal_id":"' + signalId +
+      '","strategy_id":"equity-quality-momentum-v1","asset_class":"EQUITY","symbol":"' +
+      syminfo.ticker + '","side":"BUY","timeframe":"' + timeframe.period +
+      '","signal_timestamp":"' + observedAt + '","expires_at":"' + expiresAt +
+      '","indicator_values":{"trend_sma":' + str.tostring(trend) +
+      ',"momentum":' + str.tostring(momentum) + '}}'
+    alert(payload, alert.freq_once_per_bar_close)
+
+alertcondition(longSignal, "Quant Desk long-term candidate", "Use an Any alert() function call alert.")

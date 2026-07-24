@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from uuid import uuid4
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -10,7 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from quant_trade_desk.communication.schemas import AgentMessage, MessageReceipt
 
 from .database import Database
-from .models import AgentMessageRecord
+from .models import AgentMessageRecord, AuditEventRecord
 
 
 class SqlAuditSink:
@@ -55,3 +56,33 @@ class SqlAuditSink:
                 .order_by(AgentMessageRecord.created_at)
             ).all()
             return tuple(row.envelope for row in rows)
+
+
+class SqlControlAuditSink:
+    """Append-only audit events for authenticated operator controls."""
+
+    def __init__(self, database: Database) -> None:
+        self.database = database
+
+    def append(
+        self,
+        *,
+        event_type: str,
+        actor_id: str,
+        reason_code: str,
+        details: dict[str, object],
+    ) -> str:
+        event_id = str(uuid4())
+        with self.database.sessions.begin() as session:
+            session.add(
+                AuditEventRecord(
+                    event_id=event_id,
+                    event_type=event_type,
+                    actor_id=actor_id,
+                    trace_id=None,
+                    reason_code=reason_code,
+                    details=details,
+                    created_at=datetime.now(UTC),
+                )
+            )
+        return event_id

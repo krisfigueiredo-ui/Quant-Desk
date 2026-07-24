@@ -56,3 +56,22 @@ def test_control_requires_auth_and_exact_phrase(tmp_path: Path) -> None:
         )
         assert accepted.status_code == 200
         assert accepted.json()["new_entries_blocked"] is True
+        assert accepted.json()["audit_event_id"]
+
+
+def test_emergency_stop_is_authenticated_audited_and_persistent(
+    tmp_path: Path,
+) -> None:
+    with _client(tmp_path) as client:
+        response = client.post(
+            "/api/v1/controls/emergency-stop",
+            headers={"Authorization": "Bearer fixture-operator-token-that-is-long"},
+            json={
+                "confirmation_phrase": "EMERGENCY STOP",
+                "reason": "deterministic integration test",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["status"] == "KILLED"
+        assert response.json()["audit_recorded"] is True
+        assert client.get("/api/v1/health").json()["kill_switch"]["killed"] is True

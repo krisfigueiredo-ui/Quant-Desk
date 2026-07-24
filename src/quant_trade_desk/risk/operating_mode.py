@@ -121,6 +121,7 @@ def authorize_mode(
     settings: Settings,
     *,
     activation_record: ActivationRecord | None = None,
+    activation_records: tuple[ActivationRecord, ...] = (),
     ttl: timedelta = timedelta(minutes=5),
 ) -> ModeAuthorization:
     if settings.trading_mode in {TradingMode.PAPER, TradingMode.SHADOW}:
@@ -135,7 +136,8 @@ def authorize_mode(
             enabled_asset_classes=frozenset(),
             valid_until=datetime.now(UTC) + ttl,
         )
-    if activation_record is None:
+    records = activation_records + ((activation_record,) if activation_record is not None else ())
+    if not records:
         return ModeAuthorization(
             mode=settings.trading_mode,
             enabled_asset_classes=frozenset(),
@@ -146,9 +148,13 @@ def authorize_mode(
         configured.add(AssetClass.EQUITY)
     if settings.live_crypto_enabled:
         configured.add(AssetClass.CRYPTO)
+    activated = frozenset(
+        asset_class for record in records for asset_class in record.enabled_asset_classes
+    )
+    selected_record = records[0]
     return ModeAuthorization(
         mode=settings.trading_mode,
-        enabled_asset_classes=frozenset(configured) & activation_record.enabled_asset_classes,
+        enabled_asset_classes=frozenset(configured) & activated,
         valid_until=datetime.now(UTC) + ttl,
-        activation_record_id=activation_record.record_id,
+        activation_record_id=selected_record.record_id,
     )

@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import timedelta
 from decimal import Decimal
 
-from quant_trade_desk.communication.schemas import AssetClass, RiskOutcome
+from quant_trade_desk.communication.schemas import AssetClass, RiskOutcome, Side
 from quant_trade_desk.execution.execution_agent import (
     ExecutionAgent,
     ExecutionPreflight,
@@ -91,6 +91,50 @@ def test_execution_cannot_bypass_rejection(
     )
     assert result.state == BrokerOrderState.REJECTED
     assert "RISK_REJECTED" in result.reason_code
+
+
+def test_execution_cannot_reverse_the_risk_reviewed_side(
+    proposed_order: object,
+    risk_context: RiskContext,
+) -> None:
+    decision = RiskEngine().evaluate(proposed_order, risk_context)  # type: ignore[arg-type]
+    reversed_order = proposed_order.model_copy(update={"side": Side.SELL})  # type: ignore[union-attr]
+    result = ExecutionAgent().execute(
+        order=reversed_order,
+        risk_decision=decision,
+        mode_authorization=risk_context.mode_authorization,
+        adapter=_broker(risk_context),
+        asset_class=AssetClass.EQUITY,
+        symbol="SPY",
+        idempotency_key="execution-fixture-reversed-side",
+        preflight=_preflight(risk_context),
+        now=risk_context.now,
+    )
+    assert result.state == BrokerOrderState.REJECTED
+    assert "FINAL_ORDER_DIFFERS_FROM_RISK_REVIEW" in result.reason_code
+
+
+def test_execution_cannot_change_the_risk_reviewed_limit(
+    proposed_order: object,
+    risk_context: RiskContext,
+) -> None:
+    decision = RiskEngine().evaluate(proposed_order, risk_context)  # type: ignore[arg-type]
+    changed_order = proposed_order.model_copy(  # type: ignore[union-attr]
+        update={"limit_price": Decimal("101")}
+    )
+    result = ExecutionAgent().execute(
+        order=changed_order,
+        risk_decision=decision,
+        mode_authorization=risk_context.mode_authorization,
+        adapter=_broker(risk_context),
+        asset_class=AssetClass.EQUITY,
+        symbol="SPY",
+        idempotency_key="execution-fixture-changed-limit",
+        preflight=_preflight(risk_context),
+        now=risk_context.now,
+    )
+    assert result.state == BrokerOrderState.REJECTED
+    assert "FINAL_ORDER_DIFFERS_FROM_RISK_REVIEW" in result.reason_code
 
 
 def test_paper_execution_and_duplicate_protection(

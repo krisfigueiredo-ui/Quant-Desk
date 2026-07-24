@@ -14,6 +14,7 @@ from quant_trade_desk.observability.metrics import MetricsRegistry
 from quant_trade_desk.risk.kill_switch import PersistentKillSwitch
 from quant_trade_desk.settings import Settings
 from quant_trade_desk.storage.database import Database
+from quant_trade_desk.storage.repositories import SqlControlAuditSink
 from quant_trade_desk.tradingview.webhook import TradingViewVerifier
 
 from .routes import controls, read, tradingview
@@ -31,6 +32,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = configured
     app.state.database = Database(configured.database_url)
     app.state.database.create_schema()
+    app.state.control_audit = SqlControlAuditSink(app.state.database)
     app.state.metrics = MetricsRegistry()
     app.state.kill_switch = PersistentKillSwitch(configured.state_dir / "hard-kill.json")
     app.state.paused = False

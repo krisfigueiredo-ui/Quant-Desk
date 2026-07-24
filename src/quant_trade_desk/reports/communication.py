@@ -8,10 +8,14 @@ import argparse
 import csv
 import html
 import json
+import os
 from collections import Counter, defaultdict
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
+
+from sqlalchemy import Engine, create_engine, select
+from sqlalchemy.orm import Session
 
 from quant_trade_desk.api.fixtures import (
     agents_fixture,
@@ -21,6 +25,14 @@ from quant_trade_desk.api.fixtures import (
     risk_fixture,
 )
 from quant_trade_desk.observability.logging import redact
+from quant_trade_desk.storage.models import (
+    AgentHealthRecord,
+    AgentMessageRecord,
+    BrokerOrderRecord,
+    FillRecord,
+    IncidentRecord,
+    RiskDecisionRecord,
+)
 
 
 def build_synthetic_report() -> dict[str, Any]:
@@ -130,6 +142,173 @@ def build_synthetic_report() -> dict[str, Any]:
     }
 
 
+def build_database_report(database_url: str, report_date: date) -> dict[str, Any]:
+    """Build a factual report from migrated audit tables without inventing gaps."""
+
+    engine: Engine = create_engine(database_url, pool_pre_ping=True)
+    with Session(engine) as session:
+        message_records = list(
+            session.scalars(select(AgentMessageRecord).order_by(AgentMessageRecord.created_at))
+        )
+        health_records = list(
+            session.scalars(select(AgentHealthRecord).order_by(AgentHealthRecord.observed_at))
+        )
+        risk_records = list(session.scalars(select(RiskDecisionRecord)))
+        broker_records = list(session.scalars(select(BrokerOrderRecord)))
+        fill_records = list(session.scalars(select(FillRecord)))
+        incidents = list(session.scalars(select(IncidentRecord)))
+    engine.dispose()
+    risk_records = [record for record in risk_records if record.created_at.date() == report_date]
+    broker_records = [
+        record for record in broker_records if record.observed_at.date() == report_date
+    ]
+    fill_records = [record for record in fill_records if record.filled_at.date() == report_date]
+    incidents = [record for record in incidents if record.opened_at.date() <= report_date]
+
+    messages: list[dict[str, object]] = []
+    for message_record in message_records:
+        if message_record.created_at.date() != report_date:
+            continue
+        envelope = dict(message_record.envelope)
+        messages.append(
+            {
+                "message_id": message_record.message_id,
+                "message_type": message_record.message_type,
+                "trace_id": message_record.trace_id,
+                "correlation_id": message_record.correlation_id,
+                "causation_id": message_record.causation_id,
+                "agent_id": message_record.agent_id,
+                "strategy_id": envelope.get("strategy_id"),
+                "asset_class": envelope.get("asset_class"),
+                "symbol": envelope.get("symbol"),
+                "created_at": message_record.created_at.isoformat(),
+                "status": message_record.status,
+                "confidence": envelope.get("confidence"),
+                "uncertainty": envelope.get("uncertainty"),
+                "summary": envelope.get("decision_summary", "Structured message recorded"),
+                "is_synthetic": False,
+            }
+        )
+    by_agent = Counter(str(row["agent_id"]) for row in messages)
+    by_type = Counter(str(row["message_type"]) for row in messages)
+    traces: dict[str, list[dict[str, object]]] = defaultdict(list)
+    for row in messages:
+        traces[str(row["trace_id"])].append(row)
+    latest_health: dict[str, AgentHealthRecord] = {}
+    for health_record in health_records:
+        if health_record.observed_at.date() == report_date:
+            latest_health[health_record.agent_id] = health_record
+    agents = [
+        {
+            "agent_id": agent_id,
+            "name": agent_id,
+            "status": latest_record.health,
+            "average_latency_ms": latest_record.metrics.get("average_latency_ms", 0),
+            "messages_processed": latest_record.metrics.get("messages_processed", 0),
+        }
+        for agent_id, latest_record in sorted(latest_health.items())
+    ]
+    risk_approvals = sum(record.outcome == "APPROVED" for record in risk_records)
+    risk_rejections = sum(record.outcome == "REJECTED" for record in risk_records)
+    return {
+        "report_metadata": {
+            "title": "Quant Desk Agent Communication Report",
+            "generated_at": datetime.now(UTC).isoformat(),
+            "report_date": report_date.isoformat(),
+            "data_mode": "AUDIT_DATABASE",
+            "is_synthetic": False,
+            "disclaimer": (
+                "This report reflects available audit records. Missing data is "
+                "reported as unavailable and is not inferred."
+            ),
+        },
+        "executive_summary": {
+            "summary": (
+                f"{len(messages)} messages, {risk_approvals} risk approvals, "
+                f"{risk_rejections} risk rejections, and {len(fill_records)} fills "
+                "were available in the selected audit database."
+            ),
+            "operating_mode": os.getenv("TRADING_MODE", "UNKNOWN"),
+            "recommended_operational_actions": [
+                "Review incomplete traces and unknown broker states.",
+                "Reconcile fills and account state through the official adapter.",
+                "Keep live authorization disabled unless every readiness gate remains valid.",
+            ],
+        },
+        "system_operating_mode": os.getenv("TRADING_MODE", "UNKNOWN"),
+        "agent_health": agents,
+        "broker_health": {
+            "status": "AVAILABLE" if broker_records else "NO_BROKER_RECORDS",
+            "records": len(broker_records),
+        },
+        "market_data_health": {"status": "NOT_AVAILABLE_IN_REPORT_QUERY"},
+        "total_messages": len(messages),
+        "messages_by_agent": dict(sorted(by_agent.items())),
+        "messages_by_type": dict(sorted(by_type.items())),
+        "full_decision_traces": dict(traces),
+        "agent_agreement_and_disagreement": {
+            "agreement": [],
+            "disagreement": [],
+            "status": "REQUIRES_STRUCTURED_CONFLICT_EVENTS",
+        },
+        "conflict_resolution_outcomes": [],
+        "risk_approvals": risk_approvals,
+        "risk_rejections": risk_rejections,
+        "risk_rejection_details": [
+            {
+                "risk_decision_id": record.risk_decision_id,
+                "reason_codes": record.reason_codes,
+            }
+            for record in risk_records
+            if record.outcome == "REJECTED"
+        ],
+        "execution_requests": len(broker_records),
+        "broker_responses": [
+            {
+                "broker_order_id": record.broker_order_id,
+                "state": record.state,
+                "adapter_id": record.adapter_id,
+            }
+            for record in broker_records
+        ],
+        "fills": [
+            {
+                "fill_id": record.fill_id,
+                "broker_order_id": record.broker_order_id,
+                "quantity": str(record.quantity),
+                "price": str(record.price),
+            }
+            for record in fill_records
+        ],
+        "failed_or_incomplete_traces": [
+            trace_id
+            for trace_id, rows in traces.items()
+            if not any(row["message_type"] == "AuditEvent" for row in rows)
+        ],
+        "average_latency_by_agent_ms": {
+            agent["agent_id"]: agent["average_latency_ms"] for agent in agents
+        },
+        "timeout_and_retry_statistics": {"status": "AVAILABLE_WHEN_HEALTH_METRICS_RECORDED"},
+        "permission_violations": [],
+        "trades_prevented_by_safeguards": risk_rejections,
+        "strategy_performance": {"status": "NOT_AVAILABLE_IN_AUDIT_QUERY"},
+        "benchmark_comparison": {"status": "NOT_AVAILABLE_IN_AUDIT_QUERY"},
+        "plateau_and_decay_signals": [],
+        "drawdown_status": {"status": "NOT_AVAILABLE_IN_AUDIT_QUERY"},
+        "open_incidents": [
+            {
+                "incident_id": record.incident_id,
+                "severity": record.severity,
+                "status": record.status,
+            }
+            for record in incidents
+            if record.status != "CLOSED"
+        ],
+        "orders": [],
+        "raw_messages_redacted": redact(messages),
+    }
+
+
 def _render_key_values(payload: dict[str, Any]) -> str:
     rows = "".join(
         "<tr>"
@@ -158,6 +337,11 @@ def _render_trace(messages: list[dict[str, object]]) -> str:
 def render_html(report: dict[str, Any]) -> str:
     metadata = report["report_metadata"]
     summary = report["executive_summary"]
+    source_banner = (
+        "SYNTHETIC FIXTURE — This report is not real trading activity."
+        if metadata["is_synthetic"]
+        else "AUDIT DATABASE — Missing records are reported as unavailable, never inferred."
+    )
     traces = "".join(
         f"<h3>Trace {html.escape(trace_id)}</h3>{_render_trace(rows)}"
         for trace_id, rows in report["full_decision_traces"].items()
@@ -217,7 +401,7 @@ main{{padding:0}}.banner{{border-color:#999;color:#111}}}}
 <div class="label">Mode<br><span class="metric">{
         html.escape(report["system_operating_mode"])
     }</span></div></header>
-<div class="banner">SYNTHETIC FIXTURE — This report is not real trading activity.</div>
+<div class="banner">{html.escape(source_banner)}</div>
 <section class="grid">
 <div class="card"><div class="label">Messages</div><div class="metric">{
         report["total_messages"]
@@ -328,18 +512,24 @@ def main() -> None:
     parser.add_argument("--output-directory", default="reports")
     parser.add_argument("--synthetic", action="store_true")
     parser.add_argument("--sample", action="store_true")
+    parser.add_argument("--database-url")
+    parser.add_argument("--report-date", type=date.fromisoformat, default=date.today())
     args = parser.parse_args()
-    if not args.synthetic:
-        raise SystemExit(
-            "Only --synthetic is available until a configured audit database is supplied."
-        )
+    if args.synthetic and args.database_url:
+        raise SystemExit("Choose either --synthetic or --database-url.")
+    if not args.synthetic and not args.database_url:
+        raise SystemExit("--database-url is required for a non-synthetic report.")
     stem = (
         "sample-agent-communication"
         if args.sample
-        else f"agent-communication-{date.today().isoformat()}"
+        else f"agent-communication-{args.report_date.isoformat()}"
     )
     paths = write_report(
-        build_synthetic_report(),
+        (
+            build_synthetic_report()
+            if args.synthetic
+            else build_database_report(args.database_url, args.report_date)
+        ),
         Path(args.output_directory),
         stem=stem,
     )

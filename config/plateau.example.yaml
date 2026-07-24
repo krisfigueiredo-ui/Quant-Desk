@@ -1,0 +1,14 @@
+schema_version: 1.0.0
+windows_trading_days: [20, 30, 60, 90, 126]
+minimum_confirmations: 4
+minimum_observations: 30
+conditions:
+  - no_meaningful_new_equity_high
+  - non_positive_benchmark_relative_return
+  - deteriorating_risk_adjusted_performance
+  - non_positive_or_declining_expectancy
+  - adequate_opportunity
+responses:
+  stage_1: {new_risk_multiplier: 0.75, notify: true}
+  stage_2: {new_risk_multiplier: 0.50, disable_negative_expectancy: true}
+  stage_3: {new_entries: false, exit_management: true, mode: SHADOW, manual_reset: true}

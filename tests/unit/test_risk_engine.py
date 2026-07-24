@@ -5,7 +5,12 @@ from decimal import Decimal
 
 import pytest
 
-from quant_trade_desk.communication.schemas import AssetClass, RiskOutcome
+from quant_trade_desk.communication.schemas import (
+    AssetClass,
+    RiskOutcome,
+    TimeInForce,
+    TradingHorizon,
+)
 from quant_trade_desk.risk.engine import RiskContext, RiskEngine
 from quant_trade_desk.risk.kill_switch import KillSwitchState
 
@@ -98,3 +103,72 @@ def test_kill_switch_vetoes_every_entry(
     decision = RiskEngine().evaluate(proposed_order, context)  # type: ignore[arg-type]
     assert decision.outcome == RiskOutcome.REJECTED
     assert "KILL_SWITCH_ACTIVE" in decision.reason_codes
+
+
+def test_planned_loss_limit_is_enforced(
+    proposed_order: object,
+    risk_context: RiskContext,
+) -> None:
+    order = proposed_order.model_copy(update={"planned_loss": Decimal("251")})  # type: ignore[union-attr]
+    decision = RiskEngine().evaluate(order, risk_context)
+    assert "PLANNED_LOSS_LIMIT" in decision.reason_codes
+
+
+@pytest.mark.parametrize(
+    ("context_update", "reason"),
+    [
+        ({"equity_minutes_since_open": 5}, "EQUITY_OPENING_WINDOW_BLOCK"),
+        ({"equity_day_entry_cutoff_reached": True}, "EQUITY_DAY_ENTRY_CUTOFF"),
+        ({"near_earnings": True}, "EARNINGS_PROXIMITY_BLOCK"),
+        ({"duplicate_order": True}, "DUPLICATE_ORDER"),
+    ],
+)
+def test_entry_safety_gates_are_enforced(
+    context_update: dict[str, object],
+    reason: str,
+    proposed_order: object,
+    risk_context: RiskContext,
+) -> None:
+    decision = RiskEngine().evaluate(  # type: ignore[arg-type]
+        proposed_order,
+        risk_context.model_copy(update=context_update),
+    )
+    assert reason in decision.reason_codes
+
+
+def test_crypto_day_position_uses_separate_one_percent_cap(
+    proposed_order: object,
+    risk_context: RiskContext,
+) -> None:
+    market = risk_context.market.model_copy(
+        update={"asset_class": AssetClass.CRYPTO, "symbol": "BTC-USD"}
+    )
+    order = proposed_order.model_copy(  # type: ignore[union-attr]
+        update={
+            "quantity": Decimal("15"),
+            "time_in_force": TimeInForce.GTC,
+            "time_horizon": TradingHorizon.DAY,
+        }
+    )
+    decision = RiskEngine().evaluate(
+        order,
+        risk_context.model_copy(
+            update={
+                "market": market,
+                "equity_minutes_since_open": None,
+            }
+        ),
+    )
+    assert "CRYPTO_POSITION_LIMIT" in decision.reason_codes
+
+
+def test_high_volatility_regime_reduces_approved_quantity(
+    proposed_order: object,
+    risk_context: RiskContext,
+) -> None:
+    decision = RiskEngine().evaluate(  # type: ignore[arg-type]
+        proposed_order,
+        risk_context.model_copy(update={"high_volatility_regime": True}),
+    )
+    assert decision.outcome == RiskOutcome.APPROVED
+    assert decision.approved_quantity == Decimal("0.50")

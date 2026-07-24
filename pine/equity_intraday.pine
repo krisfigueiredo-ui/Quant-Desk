@@ -1,0 +1,30 @@
+//@version=6
+indicator("Quant Desk Equity Intraday Input v1", overlay=true)
+
+// Research input only. Send alerts to an authenticated signing relay that adds
+// X-Quant-Desk-Signature. The Quant Desk receiver never executes this directly.
+fastLength = input.int(20, "Fast EMA", minval=2)
+slowLength = input.int(50, "Slow EMA", minval=5)
+volumeLength = input.int(20, "Volume average", minval=5)
+fast = ta.ema(close, fastLength)
+slow = ta.ema(close, slowLength)
+volumeRatio = volume / ta.sma(volume, volumeLength)
+longSignal = ta.crossover(fast, slow) and volumeRatio > 1.2
+
+plot(fast, "Fast EMA", color=color.new(color.blue, 0))
+plot(slow, "Slow EMA", color=color.new(color.gray, 20))
+
+if longSignal and barstate.isconfirmed
+    signalId = syminfo.tickerid + "-" + timeframe.period + "-" + str.tostring(time_close)
+    observedAt = str.format_time(time_close, "yyyy-MM-dd'T'HH:mm:ss'Z'", "UTC")
+    expiresAt = str.format_time(time_close + 60000, "yyyy-MM-dd'T'HH:mm:ss'Z'", "UTC")
+    payload = '{"schema_version":"1.0.0","signal_id":"' + signalId +
+      '","strategy_id":"equity-intraday-trend-pullback-v1","asset_class":"EQUITY","symbol":"' +
+      syminfo.ticker + '","side":"BUY","timeframe":"' + timeframe.period +
+      '","signal_timestamp":"' + observedAt + '","expires_at":"' + expiresAt +
+      '","indicator_values":{"fast_ema":' + str.tostring(fast) +
+      ',"slow_ema":' + str.tostring(slow) + ',"volume_ratio":' +
+      str.tostring(volumeRatio) + '}}'
+    alert(payload, alert.freq_once_per_bar_close)
+
+alertcondition(longSignal, "Quant Desk equity candidate", "Use an Any alert() function call alert.")

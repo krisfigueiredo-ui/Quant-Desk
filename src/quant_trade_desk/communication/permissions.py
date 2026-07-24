@@ -39,7 +39,7 @@ PERMISSIONS: dict[str, frozenset[Permission]] = {
     "long-term-investment-agent": frozenset(
         {Permission.READ_MARKET_DATA, Permission.GENERATE_SIGNAL}
     ),
-    "strategy-allocator": frozenset({Permission.READ_MARKET_DATA, Permission.PROPOSE_POSITION}),
+    "strategy-allocator": frozenset({Permission.READ_MARKET_DATA}),
     "portfolio-manager": frozenset({Permission.READ_ACCOUNT_DATA, Permission.PROPOSE_POSITION}),
     "deterministic-risk-engine": frozenset(
         {

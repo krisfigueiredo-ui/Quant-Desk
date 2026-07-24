@@ -1,0 +1,21 @@
+schema_version: 1.0.0
+default_route: paper
+fallback_to_live: false
+paper:
+  adapter: in-memory-paper-broker
+  enabled: true
+equities:
+  adapter: robinhood-agentic-mcp-bridge
+  enabled: false
+  dedicated_account_required: true
+  capability_discovery_required: true
+  official_tools_only: true
+  options_allowed: false
+crypto:
+  adapter: robinhood-crypto-v2
+  enabled: false
+  dedicated_account_required: true
+  capability_discovery_required: true
+  verified_total_equity_required: true
+  allowed_order_types: [LIMIT]
+  allowed_time_in_force: [GTC]

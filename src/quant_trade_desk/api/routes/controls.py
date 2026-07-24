@@ -25,6 +25,12 @@ def pause_new_trades(
 ) -> dict[str, object]:
     if payload.confirmation_phrase != "PAUSE NEW TRADES":
         raise HTTPException(status_code=400, detail="exact confirmation phrase required")
+    audit_event_id = request.app.state.control_audit.append(
+        event_type="OPERATOR_CONTROL",
+        actor_id=operator,
+        reason_code="PAUSE_NEW_TRADES",
+        details={"reason": payload.reason, "new_entries_blocked": True},
+    )
     request.app.state.paused = True
     request.app.state.metrics.increment("quant_desk_control_events_total", control="pause")
     return {
@@ -32,6 +38,7 @@ def pause_new_trades(
         "new_entries_blocked": True,
         "actor": operator,
         "audit_reason": payload.reason,
+        "audit_event_id": audit_event_id,
     }
 
 
@@ -47,6 +54,18 @@ def emergency_stop(
         reason_code="OPERATOR_EMERGENCY_STOP",
         incident_id=f"manual-{request.app.state.incident_counter}",
     )
+    try:
+        audit_event_id = request.app.state.control_audit.append(
+            event_type="KILL_SWITCH_EVENT",
+            actor_id=operator,
+            reason_code="OPERATOR_EMERGENCY_STOP",
+            details={
+                "reason": payload.reason,
+                "incident_id": state.incident_id,
+            },
+        )
+    except Exception:
+        audit_event_id = None
     request.app.state.incident_counter += 1
     request.app.state.metrics.increment("quant_desk_control_events_total", control="emergency_stop")
     return {
@@ -54,4 +73,6 @@ def emergency_stop(
         "kill_switch": state.model_dump(mode="json"),
         "actor": operator,
         "audit_reason": payload.reason,
+        "audit_event_id": audit_event_id,
+        "audit_recorded": audit_event_id is not None,
     }

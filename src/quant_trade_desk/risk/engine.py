@@ -18,6 +18,7 @@ from quant_trade_desk.communication.schemas import (
     RiskOutcome,
     Side,
     TradingHorizon,
+    proposed_order_checksum,
 )
 from quant_trade_desk.data.quality import MarketSnapshot
 from quant_trade_desk.settings import TradingMode
@@ -221,10 +222,8 @@ class RiskEngine:
             maximum_sector = (
                 self.limits.maximum_long_term_sector_exposure
                 if order.time_horizon == TradingHorizon.LONG_TERM
-                else self.limits.maximum_equity_position
+                else self.limits.maximum_equity_sector_exposure
             )
-            if order.time_horizon != TradingHorizon.LONG_TERM:
-                maximum_sector = self.limits.maximum_equity_sector_exposure
             if context.sector_exposure + weight > maximum_sector:
                 reasons.append("SECTOR_EXPOSURE_LIMIT")
             if (
@@ -312,5 +311,7 @@ class RiskEngine:
             approved_quantity=approved_quantity,
             valid_until=now + timedelta(seconds=15),
             risk_config_version=self.limits.version,
+            proposed_order_checksum=proposed_order_checksum(order),
+            verified_account_equity=context.account.equity,
             context_checksum=hashlib.sha256(context_json.encode()).hexdigest(),
         )

@@ -6,6 +6,8 @@ credentials or free-form hidden reasoning.
 
 from __future__ import annotations
 
+import hashlib
+import json
 from datetime import UTC, datetime
 from decimal import Decimal
 from enum import StrEnum
@@ -219,6 +221,15 @@ class ProposedOrderPayload(FrozenModel):
     time_horizon: TradingHorizon = TradingHorizon.DAY
 
 
+def proposed_order_checksum(order: ProposedOrderPayload) -> str:
+    canonical = json.dumps(
+        order.model_dump(mode="json"),
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(canonical.encode()).hexdigest()
+
+
 class RiskOutcome(StrEnum):
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
@@ -234,6 +245,8 @@ class RiskDecisionPayload(FrozenModel):
     approved_quantity: Decimal = Field(ge=0)
     valid_until: datetime
     risk_config_version: str
+    proposed_order_checksum: str = Field(min_length=64, max_length=64)
+    verified_account_equity: Decimal = Field(gt=0)
     context_checksum: str
 
 

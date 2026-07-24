@@ -1,0 +1,38 @@
+schema_version: 1.0.0
+global:
+  maximum_total_deployed: 0.50
+  maximum_gross_exposure: 0.50
+  minimum_cash_reserve: 0.50
+  maximum_daily_loss: 0.01
+  maximum_weekly_loss: 0.03
+  maximum_planned_loss_per_trade: 0.0025
+  maximum_live_orders_per_day: 5
+  maximum_open_orders: 5
+  margin: false
+  leverage: false
+  short_selling: false
+  options: false
+  derivatives: false
+  martingale: false
+equities:
+  maximum_position: 0.05
+  maximum_day_position: 0.02
+  maximum_new_day_trades: 3
+  maximum_sector_exposure: 0.15
+  block_open_minutes: 15
+  maximum_spread_bps: 35
+  maximum_market_data_age_seconds: 15
+crypto:
+  maximum_allocation: 0.10
+  maximum_position: 0.02
+  maximum_day_position: 0.01
+  maximum_new_trades_rolling_24h: 3
+  maximum_spread_bps: 60
+  maximum_market_data_age_seconds: 10
+long_term:
+  maximum_position: 0.05
+  maximum_sector_exposure: 0.20
+  maximum_crypto_allocation: 0.10
+drawdown:
+  thresholds: [0.05, 0.10, 0.15, 0.20, 0.25, 0.37]
+  hard_kill_persists: true

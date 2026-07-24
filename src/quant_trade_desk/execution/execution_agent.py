@@ -16,6 +16,7 @@ from quant_trade_desk.communication.schemas import (
     RiskDecisionPayload,
     RiskOutcome,
     Side,
+    proposed_order_checksum,
 )
 from quant_trade_desk.risk.operating_mode import ModeAuthorization
 from quant_trade_desk.settings import TradingMode
@@ -72,6 +73,8 @@ class ExecutionAgent:
         reasons: list[str] = []
         if risk_decision.proposed_order_id != order.proposed_order_id:
             reasons.append("RISK_ORDER_ID_MISMATCH")
+        if risk_decision.proposed_order_checksum != proposed_order_checksum(order):
+            reasons.append("FINAL_ORDER_DIFFERS_FROM_RISK_REVIEW")
         if risk_decision.valid_until.astimezone(UTC) <= instant:
             reasons.append("RISK_AUTHORIZATION_EXPIRED")
         if risk_decision.outcome == RiskOutcome.REJECTED:
@@ -100,6 +103,8 @@ class ExecutionAgent:
             reasons.append("OPERATING_MODE_NOT_EXECUTABLE")
         if not preflight.account_identity_verified:
             reasons.append("ACCOUNT_IDENTITY_UNVERIFIED")
+        if preflight.account_equity != risk_decision.verified_account_equity:
+            reasons.append("ACCOUNT_EQUITY_CHANGED")
         if order.side == Side.BUY:
             reference = order.limit_price or preflight.latest_ask
             if order.quantity * reference > preflight.buying_power:
@@ -108,6 +113,11 @@ class ExecutionAgent:
             reasons.append("POSITION_CHANGED")
         if preflight.latest_bid > preflight.latest_ask:
             reasons.append("CROSSED_MARKET")
+        else:
+            midpoint = (preflight.latest_bid + preflight.latest_ask) / Decimal("2")
+            spread_bps = (preflight.latest_ask - preflight.latest_bid) / midpoint * Decimal("10000")
+            if spread_bps > order.max_slippage_bps:
+                reasons.append("SPREAD_EXCEEDS_AUTHORIZED_TOLERANCE")
         if instant - preflight.market_timestamp.astimezone(UTC) > timedelta(seconds=15):
             reasons.append("MARKET_DATA_STALE")
         checks = {
